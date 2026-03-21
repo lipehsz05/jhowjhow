@@ -1220,7 +1220,7 @@
             <div class="sidebar-brand">
                 <img
                     class="sidebar-brand__mark"
-                    src="{{ url('/logo/' . rawurlencode('JHOW JHOW BLACK.png')) }}"
+                    src="{{ asset('logo/jhow-jhow-mark.png') }}"
                     width="120"
                     height="120"
                     alt="Jhow Jhow"
@@ -1229,7 +1229,7 @@
                     decoding="async">
                 <img
                     class="sidebar-brand__wordmark"
-                    src="{{ url('/logo/' . rawurlencode('JHOW JHOW TEXTO BLACK.png')) }}"
+                    src="{{ asset('logo/jhow-jhow-wordmark.png') }}"
                     width="280"
                     height="80"
                     alt=""
