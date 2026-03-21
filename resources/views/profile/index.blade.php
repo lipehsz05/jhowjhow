@@ -2,17 +2,59 @@
 
 @section('title', 'Meu Perfil')
 
+@section('styles')
+<style>
+    .profile-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-bottom: 2rem;
+    }
+    .profile-page .page-heading {
+        margin-bottom: 1.75rem;
+    }
+    .profile-page ol.breadcrumb {
+        margin-bottom: 0;
+    }
+    .profile-page .page-heading h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark);
+    }
+    .profile-cards-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.75rem;
+        align-items: start;
+    }
+    @media (min-width: 992px) {
+        .profile-cards-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+    }
+    .profile-cards-grid .card {
+        margin-bottom: 0;
+    }
+    .profile-cards-grid .card-body {
+        padding-top: 1.25rem;
+    }
+</style>
+@endsection
+
 @section('content')
-<div class="container-fluid px-4">
-    <h1 class="mt-4">Meu Perfil</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item active">Meu Perfil</li>
-    </ol>
+<div class="container-fluid px-4 profile-page">
+    <div class="page-heading">
+        <h1>Meu Perfil</h1>
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Meu Perfil</li>
+        </ol>
+    </div>
     
-    <div class="row">
-        <div class="col-xl-6">
-            <div class="card mb-4">
+    <div class="profile-cards-grid">
+        <div>
+            <div class="card">
                 <div class="card-header">
                     <i class="fas fa-user me-1"></i>
                     Informações Pessoais
@@ -55,8 +97,8 @@
             </div>
         </div>
         
-        <div class="col-xl-6">
-            <div class="card mb-4">
+        <div>
+            <div class="card">
                 <div class="card-header">
                     <i class="fas fa-key me-1"></i>
                     Alterar Senha

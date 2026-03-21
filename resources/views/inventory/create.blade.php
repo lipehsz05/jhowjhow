@@ -90,7 +90,7 @@
                         </div>
                     </div>
                     
-                    <div class="col-md-5 offset-md-1" style="margin-left: 80px; padding-left: 40px;"> <!-- Ajustado com margens inline para maior separação -->
+                    <div class="col-md-5 offset-md-1">
                         <div class="form-group mb-4"> <!-- Aumentado o margin-bottom -->
                             <label for="preco_compra" class="form-label fw-bold">
                                 <i class="fas fa-tag me-1"></i> Preço de Compra*

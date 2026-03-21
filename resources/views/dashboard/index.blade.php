@@ -44,7 +44,7 @@
     
     /* Container do Dashboard */
     .dashboard-container {
-        padding: 20px;
+        padding: 8px 16px 20px;
         width: 100%;
         max-width: 1400px;
         margin: 0 auto;
@@ -53,7 +53,7 @@
     /* Media Queries para responsividade */
     @media (max-width: 768px) {
         .dashboard-container {
-            padding: 15px 10px;
+            padding: 8px 10px 15px;
         }
         
         .dashboard-title {
@@ -448,18 +448,28 @@
 @endsection
 
 @section('content')
+@php
+    $hora = now()->hour;
+    if ($hora >= 5 && $hora < 12) {
+        $saudacaoDashboard = 'Bom dia';
+    } elseif ($hora >= 12 && $hora < 18) {
+        $saudacaoDashboard = 'Boa tarde';
+    } else {
+        $saudacaoDashboard = 'Boa noite';
+    }
+@endphp
 <div id="dashboard-section" class="content-wrapper">
     <div class="dashboard-container">
         <!-- Alertas e notificações serão exibidos via SweetAlert2 -->
         
         <div class="dashboard-header">
-            <h2 class="dashboard-title">Bem-vindo {{ Auth::user()->name }}</h2>
+            <h2 class="dashboard-title">{{ $saudacaoDashboard }} {{ Auth::user()->name }}, bem vindo ao Dashboard 👋</h2>
             <div class="period-selector">
-                <button id="period-daily" data-period="daily" class="period-btn">Diário</button>
-                <button id="period-weekly" data-period="weekly" class="period-btn">Semanal</button>
-                <button id="period-monthly" data-period="monthly" class="period-btn active">Mensal</button>
-                <button id="period-yearly" data-period="yearly" class="period-btn">Anual</button>
-                <button id="period-custom" data-period="custom" class="period-btn">Personalizado</button>
+                <button type="button" id="period-daily" data-period="daily" class="period-btn active">Hoje</button>
+                <button type="button" id="period-yesterday" data-period="yesterday" class="period-btn">Ontem</button>
+                <button type="button" id="period-weekly" data-period="weekly" class="period-btn">Essa semana</button>
+                <button type="button" id="period-monthly" data-period="monthly" class="period-btn">Esse mês</button>
+                <button type="button" id="period-custom" data-period="custom" class="period-btn">personalizado</button>
             </div>
             
             <!-- Seletor de datas personalizado -->
@@ -772,8 +782,15 @@
         let customStartDate = localStorage.getItem('dashboardCustomStartDate') || null;
         let customEndDate = localStorage.getItem('dashboardCustomEndDate') || null;
         
+        // Períodos removidos da interface (anual, trimestre) → voltam para "Hoje"
+        (function () {
+            const p = localStorage.getItem('dashboardPeriod');
+            if (p === 'yearly' || p === 'quarterly') {
+                localStorage.setItem('dashboardPeriod', 'daily');
+            }
+        })();
+        
         // Verificar se há um período salvo no localStorage e aplicar
-        // Se não houver, usaremos o botão que estiver marcado como ativo na interface
         const savedPeriod = localStorage.getItem('dashboardPeriod');
         const activePeriodButton = document.querySelector('.period-btn.active');
         
@@ -864,7 +881,7 @@
                 maintainAspectRatio: false,
                 title: {
                     display: true,
-                    text: 'Resumo Financeiro - Últimos 30 dias',
+                    text: 'Resumo financeiro',
                     fontSize: 18
                 },
                 tooltips: {
@@ -1124,18 +1141,7 @@
                     if (dailyBtn) dailyBtn.classList.add('active');
                 }
                 
-                // Garantir que o período mensal nunca seja usado como padrão
-                if (currentPeriod === 'monthly' && window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_NAVIGATE) {
-                    currentPeriod = 'daily';
-                    localStorage.setItem('dashboardPeriod', 'daily');
-                    
-                    // Ativar o botão diário
-                    document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
-                    const dailyBtn = document.getElementById('period-daily');
-                    if (dailyBtn) dailyBtn.classList.add('active');
-                }
-                
-                // Enviar imediatamente o período para o backend para evitar que use o padrão 'monthly'
+                // Enviar período ao backend após montar a UI
                 console.log('Inicializando dashboard com período:', currentPeriod);
                 setTimeout(() => {
                     // SOLUÇÃO DEFINITIVA: Sobreescrever os métodos do Chart.js que causam o problema
@@ -1188,15 +1194,12 @@
                                         const period = localStorage.getItem('dashboardPeriod') || 'daily';
                                         const title = tooltipItems[0].xLabel;
                                         
-                                        if (period === 'daily') {
+                                        if (period === 'daily' || period === 'yesterday') {
                                             return 'Hora: ' + title;
-                                        } else if (period === 'weekly' || period === 'monthly') {
+                                        } else if (period === 'weekly' || period === 'monthly' || period === 'custom') {
                                             return 'Data: ' + title;
-                                        } else if (period === 'yearly') {
-                                            return 'Mês: ' + title;
-                                        } else {
-                                            return title;
                                         }
+                                        return title;
                                     }
                                 };
                             }
@@ -1262,11 +1265,11 @@
                     }, 500); // Verificar a cada 500ms
                 }, 100);
             } else {
-                // Se não encontrar o botão, usar o mensal como padrão
-                const monthlyBtn = document.getElementById('period-monthly');
-                if (monthlyBtn) {
-                    monthlyBtn.classList.add('active');
-                    currentPeriod = 'monthly';
+                const dailyBtn = document.getElementById('period-daily');
+                if (dailyBtn) {
+                    dailyBtn.classList.add('active');
+                    currentPeriod = 'daily';
+                    localStorage.setItem('dashboardPeriod', 'daily');
                 }
             }
         }
@@ -1281,23 +1284,6 @@
         function createChart(chartData, forceUpdate = false) {
             // PROTEÇÃO DEFINITIVA: Detectar e bloquear tentativas de mudança não autorizadas
             const storedPeriod = localStorage.getItem('dashboardPeriod');
-            
-            // Verificar se é uma tentativa de voltar para o período mensal (30 dias)
-            if (!updatingFromUserAction && !forceUpdate) {
-                // Se tem labels e são 30, pode ser uma tentativa de voltar para mensal
-                if (chartData.labels && chartData.labels.length === 30 && currentPeriod !== 'monthly') {
-                    console.log('BLOQUEADA tentativa de mudar para 30 dias!');
-                    
-                    // Restaurar período correto com alta prioridade
-                    const btn = document.getElementById('period-' + currentPeriod);
-                    if (btn) {
-                        console.log('Restaurando período para:', currentPeriod);
-                        setTimeout(() => btn.click(), 0);
-                    }
-                    
-                    return false;
-                }
-            }
             
             // Evitar qualquer atualização quando o mouse estiver sobre o gráfico, a menos que seja uma ação do usuário
             if (mouseOverChart && !updatingFromUserAction) {
@@ -1322,22 +1308,22 @@
             chartData.despesas = chartData.despesas || [800, 900, 850, 950, 1100, 1200];
             
             // Definir título com base no período atual
-            let chartTitle = 'Dados Financeiros';
+            let chartTitle = 'Resumo financeiro';
             switch(currentPeriod) {
                 case 'daily':
-                    chartTitle = 'Dados Financeiros por Hora - Últimas 24 Horas';
+                    chartTitle = 'Hoje — valores por hora';
+                    break;
+                case 'yesterday':
+                    chartTitle = 'Ontem — valores por hora';
                     break;
                 case 'weekly':
-                    chartTitle = 'Dados Financeiros Diários - Últimos 7 Dias';
+                    chartTitle = 'Essa semana — valores por dia';
                     break;
                 case 'monthly':
-                    chartTitle = 'Dados Financeiros Diários - Últimos 30 Dias';
-                    break;
-                case 'yearly':
-                    chartTitle = 'Dados Financeiros Diários - Últimos 12 Meses';
+                    chartTitle = 'Esse mês — valores por dia';
                     break;
                 case 'custom':
-                    chartTitle = 'Dados Financeiros Diários - Período Personalizado';
+                    chartTitle = 'Período personalizado — por dia';
                     break;
             }
             
@@ -1425,21 +1411,20 @@
                                 const item = tooltipItems[0];
                                 const label = data.labels[item.index];
                                 
-                                if (currentPeriod === 'daily') {
-                                    // Para período diário, mostrar a hora
+                                if (currentPeriod === 'daily' || currentPeriod === 'yesterday') {
                                     return 'Hora: ' + label;
-                                } else if (currentPeriod === 'weekly' || currentPeriod === 'monthly') {
-                                    // Para períodos semanal ou mensal, formatar a data
-                                    const date = new Date(label);
-                                    return 'Data: ' + date.toLocaleDateString('pt-BR', {
-                                        day: '2-digit',
-                                        month: '2-digit',
-                                        year: 'numeric'
-                                    });
-                                } else {
-                                    // Para outros períodos
-                                    return 'Período: ' + label;
                                 }
+                                if (currentPeriod === 'weekly' || currentPeriod === 'monthly' || currentPeriod === 'custom') {
+                                    const date = new Date(label + (label.length <= 10 ? 'T12:00:00' : ''));
+                                    if (!isNaN(date.getTime())) {
+                                        return 'Data: ' + date.toLocaleDateString('pt-BR', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric'
+                                        });
+                                    }
+                                }
+                                return 'Período: ' + label;
                             },
                             // Detalhes de cada tipo de valor
                             label: function(tooltipItem, data) {

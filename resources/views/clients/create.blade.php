@@ -1,0 +1,93 @@
+@extends('layouts.app')
+
+@section('title', 'Novo cliente')
+
+@section('content')
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Novo cliente</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('clients.index') }}">Clientes</a></li>
+        <li class="breadcrumb-item active">Novo</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-user-plus me-1"></i> Cadastro</span>
+            <a href="{{ route('clients.index') }}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Voltar</a>
+        </div>
+        <div class="card-body">
+            @if($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+                </div>
+            @endif
+            <form action="{{ route('clients.store') }}" method="POST">
+                @csrf
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold" for="nome">Nome *</label>
+                        <input type="text" class="form-control @error('nome') is-invalid @enderror" id="nome" name="nome" value="{{ old('nome') }}" required>
+                        @error('nome')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold" for="email">E-mail *</label>
+                        <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required autocomplete="email" placeholder="nome@exemplo.com">
+                        @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold" for="telefone">Telefone</label>
+                        <input type="text" class="form-control @error('telefone') is-invalid @enderror" id="telefone" name="telefone" value="{{ old('telefone') }}" placeholder="(83) 99359-8119" maxlength="15" inputmode="numeric" autocomplete="tel">
+                        @error('telefone')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold" for="cpf_cnpj">CPF / CNPJ</label>
+                        <input type="text" class="form-control @error('cpf_cnpj') is-invalid @enderror" id="cpf_cnpj" name="cpf_cnpj" value="{{ old('cpf_cnpj') }}" placeholder="000.000.000-00" maxlength="18" inputmode="numeric">
+                        @error('cpf_cnpj')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-12 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="sem_endereco" value="1" id="sem_endereco" @checked(old('sem_endereco') == '1')>
+                            <label class="form-check-label fw-semibold" for="sem_endereco">Cliente sem endereço</label>
+                        </div>
+                        <small class="text-muted">Marcado: CEP e endereço ficam em branco e não são obrigatórios.</small>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold" for="cep">CEP</label>
+                        <input type="text" class="form-control @error('cep') is-invalid @enderror" id="cep" name="cep" value="{{ old('cep') }}" placeholder="00000-000" maxlength="9" inputmode="numeric" autocomplete="postal-code">
+                        <small class="text-muted">Preenche logradouro, cidade e UF ao completar 8 dígitos.</small>
+                        @error('cep')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label class="form-label fw-bold" for="endereco">Endereço</label>
+                        <input type="text" class="form-control @error('endereco') is-invalid @enderror" id="endereco" name="endereco" value="{{ old('endereco') }}">
+                        @error('endereco')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label fw-bold" for="cidade">Cidade</label>
+                        <input type="text" class="form-control @error('cidade') is-invalid @enderror" id="cidade" name="cidade" value="{{ old('cidade') }}">
+                        @error('cidade')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold" for="estado">UF</label>
+                        <input type="text" class="form-control @error('estado') is-invalid @enderror" id="estado" name="estado" value="{{ old('estado') }}" maxlength="2" placeholder="SP">
+                        @error('estado')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Salvar</button>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
+
+@section('scripts')
+@include('clients.partials.br-masks')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (window.BrClienteMasks) {
+        BrClienteMasks.bindClienteForm(document);
+    }
+});
+</script>
+@endsection

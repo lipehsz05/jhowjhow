@@ -8,14 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Venda extends Model
 {
     use HasFactory;
-    
+
     /**
      * A tabela associada ao modelo.
      *
      * @var string
      */
     protected $table = 'vendas';
-    
+
     /**
      * Os atributos que são atribuíveis em massa.
      *
@@ -23,7 +23,7 @@ class Venda extends Model
      */
     protected $fillable = [
         'cliente_id',
-        'usuario_id',
+        'user_id',
         'data',
         'valor_total',
         'desconto',
@@ -32,7 +32,7 @@ class Venda extends Model
         'observacao',
         'codigo',
     ];
-    
+
     /**
      * Os atributos que devem ser convertidos para tipos nativos.
      *
@@ -43,7 +43,7 @@ class Venda extends Model
         'valor_total' => 'float',
         'desconto' => 'float',
     ];
-    
+
     /**
      * Relacionamento com o cliente
      */
@@ -51,15 +51,15 @@ class Venda extends Model
     {
         return $this->belongsTo(Cliente::class);
     }
-    
+
     /**
      * Relacionamento com o usuário que registrou a venda
      */
     public function usuario()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
-    
+
     /**
      * Relacionamento com os itens da venda
      */

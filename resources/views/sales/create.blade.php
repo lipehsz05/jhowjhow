@@ -437,7 +437,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="telefone_cliente" class="form-label">Telefone</label>
-                        <input type="text" class="form-control" id="telefone_cliente" placeholder="(83) 99999-9999">
+                        <input type="text" class="form-control" id="telefone_cliente" placeholder="(83) 99359-8119" maxlength="15" inputmode="numeric" autocomplete="tel">
                         <div class="invalid-feedback" id="telefone_cliente_error"></div>
                         <small class="form-text text-muted">Formato: (83) 99999-9999</small>
                     </div>
@@ -454,34 +454,8 @@
 @endsection
 
 @section('scripts')
+@include('clients.partials.br-masks')
 <script>
-    // Função para formatar telefone
-    document.getElementById('telefone_cliente').addEventListener('input', function(e) {
-        // Remove caracteres não numéricos
-        let value = e.target.value.replace(/\D/g, '');
-        
-        // Limita a 11 dígitos
-        if (value.length > 11) {
-            value = value.substring(0, 11);
-        }
-        
-        // Formata o telefone
-        if (value.length > 0) {
-            if (value.length > 2) {
-                value = '(' + value.substring(0, 2) + ') ' + value.substring(2);
-            }
-            if (value.length > 7) {
-                // Ajusta o índice para levar em conta os parênteses e espaço
-                value = value.substring(0, 10) + '-' + value.substring(10);
-            }
-        }
-        
-        e.target.value = value;
-    });
-    
-    // Define o atributo maxlength para limitar o tamanho total do campo
-    document.getElementById('telefone_cliente').setAttribute('maxlength', '16'); // (99) 99999-9999
-    
     // Função para validar email
     function validateEmail(email) {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -491,6 +465,9 @@
     // Inicialização correta do modal
     let novoClienteModal = null;
     document.addEventListener('DOMContentLoaded', function() {
+        if (window.BrClienteMasks) {
+            BrClienteMasks.bindTelefone(document.getElementById('telefone_cliente'));
+        }
         // Inicializar o modal corretamente
         novoClienteModal = new bootstrap.Modal(document.getElementById('novoClienteModal'), {
             backdrop: 'static',  // Não fechar ao clicar fora

@@ -215,6 +215,20 @@
         transform: translateY(-2px) !important;
         box-shadow: 0 5px 12px rgba(67, 97, 238, 0.35) !important;
     }
+    
+    @media (max-width: 520px) {
+        ul.pagination {
+            flex-wrap: wrap !important;
+            justify-content: center;
+            row-gap: 8px;
+            max-width: 100%;
+        }
+        .pagination .page-item .page-link {
+            min-width: 32px !important;
+            height: 32px !important;
+            font-size: 0.8rem !important;
+        }
+    }
 </style>
 @endsection
 
@@ -276,7 +290,7 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         @if (!auth()->user()->isVendedor())
-                                            <a href="{{ route('inventory.edit', $produto->id) }}" class="btn btn-primary btn-sm me-3" style="width: 90px;">
+                                            <a href="{{ route('inventory.edit', $produto->id) }}" class="btn btn-primary btn-sm me-3">
                                                 <i class="fas fa-edit"></i> Editar
                                             </a>
                                             <!-- Formulário escondido para exclusão -->
@@ -285,7 +299,7 @@
                                                 @method('DELETE')
                                             </form>
                                             <!-- Botão que aciona o modal -->
-                                            <button type="button" class="btn btn-danger btn-sm delete-btn" style="width: 90px;" data-id="{{ $produto->id }}" data-name="{{ $produto->nome }}">
+                                            <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="{{ $produto->id }}" data-name="{{ $produto->nome }}">
                                                 <i class="fas fa-trash-alt"></i> Excluir
                                             </button>
                                         @else

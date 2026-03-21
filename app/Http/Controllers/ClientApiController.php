@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Cliente;
+use App\Support\BrFormat;
+use Illuminate\Http\Request;
 
 class ClientApiController extends Controller
 {
@@ -29,12 +30,7 @@ class ClientApiController extends Controller
                 'email.email' => 'Digite um email válido'
             ]);
             
-            // Processar telefone (limpar caracteres não numéricos)
-            $telefone = $request->telefone;
-            if ($telefone) {
-                $telefone = preg_replace('/[^0-9]/', '', $telefone);
-                $telefone = substr($telefone, 0, 11);  // Limitar a 11 dígitos
-            }
+            $telefone = BrFormat::normalizeTelefone($request->telefone);
             
             // Criar o cliente com valores explícitos
             $cliente = new Cliente();

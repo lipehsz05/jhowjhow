@@ -18,29 +18,29 @@
     <style>
         /* Variáveis CSS para tema */
         :root {
-            --primary: #4361ee;
-            --primary-light: #4895ef;
-            --primary-dark: #3a0ca3;
-            --secondary: #7209b7;
-            --accent: #f72585;
-            --success: #4cc9f0;
-            --warning: #fb8500;
-            --error: #d90429;
-            --dark: #2b2d42;
-            --gray-dark: #343a40;
-            --gray: #6c757d;
-            --gray-light: #f8f9fa;
+            --primary: #0a0a0a;
+            --primary-light: #404040;
+            --primary-dark: #000000;
+            --secondary: #262626;
+            --accent: #525252;
+            --success: #404040;
+            --warning: #737373;
+            --error: #1a1a1a;
+            --dark: #0a0a0a;
+            --gray-dark: #262626;
+            --gray: #737373;
+            --gray-light: #f4f4f5;
             --white: #ffffff;
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --input-bg: #f1f5f9;
-            --input-border: #e2e8f0;
-            --input-focus: #cbd5e1;
-            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --card-bg: rgba(255, 255, 255, 0.96);
+            --input-bg: #f4f4f5;
+            --input-border: #d4d4d4;
+            --input-focus: #a3a3a3;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
             --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --gradient-primary: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
-            --gradient-secondary: linear-gradient(135deg, #7209b7 0%, #f72585 100%);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
+            --gradient-primary: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            --gradient-secondary: linear-gradient(135deg, #404040 0%, #262626 100%);
             --transition-fast: all 0.2s ease;
             --transition-normal: all 0.3s ease;
             --transition-slow: all 0.5s ease;
@@ -66,7 +66,7 @@
             color: var(--dark);
             line-height: 1.6;
             position: relative;
-            background: linear-gradient(-45deg, #4361ee, #3a0ca3, #7209b7, #f72585);
+            background: linear-gradient(-45deg, #0a0a0a, #262626, #525252, #171717);
             background-size: 400% 400%;
             animation: gradientBackground 15s ease infinite;
         }
@@ -123,7 +123,7 @@
             overflow: hidden;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(0, 0, 0, 0.08);
         }
         
         @keyframes fadeIn {
@@ -193,7 +193,7 @@
         .login-input:focus {
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12);
             background-color: var(--white);
         }
         

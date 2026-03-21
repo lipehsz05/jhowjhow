@@ -26,6 +26,12 @@
                 <span>Vendas</span>
             </a>
         </li>
+        <li>
+            <a href="{{ route('clients.index') }}" class="{{ request()->routeIs('clients.*') ? 'active' : '' }}">
+                <i class="fas fa-users"></i>
+                <span>Clientes</span>
+            </a>
+        </li>
         @endif
         
         {{-- Histórico: acessível para administrador, dono e vendedor --}}
