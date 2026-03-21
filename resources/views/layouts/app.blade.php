@@ -1220,20 +1220,19 @@
             <div class="sidebar-brand">
                 <img
                     class="sidebar-brand__mark"
-                    src="{{ asset('logo/jhow-jhow-mark.png') }}"
+                    src="/public/logo/jhow-jhow-mark.png"
                     width="120"
                     height="120"
-                    alt="Jhow Jhow"
+                    alt="Ícone"
                     draggable="false"
                     loading="eager"
                     decoding="async">
                 <img
                     class="sidebar-brand__wordmark"
-                    src="{{ asset('logo/jhow-jhow-wordmark.png') }}"
+                    src="/public/logo/jhow-jhow-wordmark.png"
                     width="280"
                     height="80"
-                    alt=""
-                    role="presentation"
+                    alt="Logo"
                     draggable="false"
                     loading="eager"
                     decoding="async">
