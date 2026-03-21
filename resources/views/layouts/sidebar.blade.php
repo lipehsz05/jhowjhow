@@ -17,6 +17,12 @@
                 <span>Estoque</span>
             </a>
         </li>
+        <li>
+            <a href="{{ route('categories.create') }}" class="{{ request()->routeIs('categories.*') ? 'active' : '' }}">
+                <i class="fas fa-folder-plus"></i>
+                <span>Nova categoria</span>
+            </a>
+        </li>
         
         {{-- Vendas: acessível para administrador, dono e vendedor --}}
         @if (Auth::user()->nivel_acesso === 'administrador' || Auth::user()->nivel_acesso === 'dono' || Auth::user()->nivel_acesso === 'vendedor')

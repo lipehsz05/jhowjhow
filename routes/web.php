@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HistoryController;
@@ -49,6 +50,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/users/{user}/edit', [\App\Http\Controllers\AdminController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [\App\Http\Controllers\AdminController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [\App\Http\Controllers\AdminController::class, 'destroy'])->name('users.destroy');
+    });
+
+    // Categorias (cadastro)
+    Route::prefix('categories')->name('categories.')->group(function () {
+        Route::get('/create', [CategoriaController::class, 'create'])->name('create');
+        Route::post('/', [CategoriaController::class, 'store'])->name('store');
     });
 
     // Estoque

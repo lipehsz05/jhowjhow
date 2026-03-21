@@ -1,0 +1,105 @@
+@extends('layouts.app')
+
+@section('title', 'Cadastrar Categoria')
+
+@section('content')
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Cadastrar Categoria</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('inventory.index') }}">Estoque</a></li>
+        <li class="breadcrumb-item active">Nova categoria</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-tags me-1"></i>
+                    Nova categoria
+                </div>
+                <a href="{{ route('inventory.index') }}" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Voltar ao estoque
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                </div>
+            @endif
+
+            <form action="{{ route('categories.store') }}" method="POST">
+                @csrf
+
+                <div class="row">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="mb-3">
+                            <label for="nome" class="form-label fw-bold">
+                                <i class="fas fa-font me-1"></i> Nome da categoria*
+                            </label>
+                            <input type="text"
+                                   class="form-control @error('nome') is-invalid @enderror"
+                                   id="nome"
+                                   name="nome"
+                                   value="{{ old('nome') }}"
+                                   required
+                                   maxlength="255"
+                                   placeholder="Ex.: Bebidas, Limpeza…">
+                            @error('nome')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="descricao" class="form-label fw-bold">
+                                <i class="fas fa-align-left me-1"></i> Descrição
+                            </label>
+                            <textarea class="form-control @error('descricao') is-invalid @enderror"
+                                      id="descricao"
+                                      name="descricao"
+                                      rows="4"
+                                      maxlength="5000"
+                                      placeholder="Opcional">{{ old('descricao') }}</textarea>
+                            @error('descricao')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4 form-check">
+                            <input type="checkbox"
+                                   class="form-check-input @error('ativa') is-invalid @enderror"
+                                   id="ativa"
+                                   name="ativa"
+                                   value="1"
+                                   @checked(old('ativa', true))>
+                            <label class="form-check-label" for="ativa">Categoria ativa</label>
+                            @error('ativa')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                            <div class="form-text">Categorias inativas não aparecem ao cadastrar produtos.</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Salvar categoria
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
