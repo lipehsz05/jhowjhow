@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Cadastrar Categoria')
+@section('title', 'Editar Categoria')
 
 @section('content')
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Cadastrar Categoria</h1>
+    <h1 class="mt-4">Editar categoria</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
         <li class="breadcrumb-item"><a href="{{ url('/categories') }}">Categorias</a></li>
-        <li class="breadcrumb-item active">Nova categoria</li>
+        <li class="breadcrumb-item active">{{ $categoria->nome }}</li>
     </ol>
 
     <div class="card mb-4">
@@ -16,7 +16,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <i class="fas fa-tags me-1"></i>
-                    Nova categoria
+                    Editar: {{ $categoria->nome }}
                 </div>
                 <a href="{{ url('/categories') }}" class="btn btn-secondary btn-sm">
                     <i class="fas fa-arrow-left"></i> Voltar à lista
@@ -24,13 +24,6 @@
             </div>
         </div>
         <div class="card-body">
-            @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-                </div>
-            @endif
-
             @if ($errors->any())
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <ul class="mb-0">
@@ -42,8 +35,9 @@
                 </div>
             @endif
 
-            <form action="{{ url('/categories') }}" method="POST">
+            <form action="{{ url('/categories/' . $categoria->id) }}" method="POST">
                 @csrf
+                @method('PUT')
 
                 <div class="row">
                     <div class="col-md-8 col-lg-6">
@@ -55,7 +49,7 @@
                                    class="form-control @error('nome') is-invalid @enderror"
                                    id="nome"
                                    name="nome"
-                                   value="{{ old('nome') }}"
+                                   value="{{ old('nome', $categoria->nome) }}"
                                    required
                                    maxlength="255"
                                    placeholder="Ex.: Bebidas, Limpeza…">
@@ -73,7 +67,7 @@
                                       name="descricao"
                                       rows="4"
                                       maxlength="5000"
-                                      placeholder="Opcional">{{ old('descricao') }}</textarea>
+                                      placeholder="Opcional">{{ old('descricao', $categoria->descricao) }}</textarea>
                             @error('descricao')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -85,7 +79,7 @@
                                    id="ativa"
                                    name="ativa"
                                    value="1"
-                                   @checked(old('ativa', true))>
+                                   @checked(old('ativa', $categoria->ativa))>
                             <label class="form-check-label" for="ativa">Categoria ativa</label>
                             @error('ativa')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -94,7 +88,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i> Salvar categoria
+                            <i class="fas fa-save me-1"></i> Salvar alterações
                         </button>
                     </div>
                 </div>

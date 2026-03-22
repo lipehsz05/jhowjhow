@@ -52,8 +52,12 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/users/{user}', [\App\Http\Controllers\AdminController::class, 'destroy'])->name('users.destroy');
     });
 
+    Route::get('/categories', [CategoriaController::class, 'index'])->name('categories.index');
     Route::get('/categories/create', [CategoriaController::class, 'create'])->name('categories.create');
     Route::post('/categories', [CategoriaController::class, 'store'])->name('categories.store');
+    Route::get('/categories/{categoria}/edit', [CategoriaController::class, 'edit'])->name('categories.edit');
+    Route::put('/categories/{categoria}', [CategoriaController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{categoria}', [CategoriaController::class, 'destroy'])->name('categories.destroy');
     Route::redirect('/inventory/categories/create', '/categories/create');
 
     // Estoque

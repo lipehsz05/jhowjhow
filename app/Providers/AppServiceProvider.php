@@ -7,6 +7,7 @@ use Illuminate\Routing\Router;
 use App\Http\Middleware\UserActivity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Paginator::useBootstrapFive();
+
         // Definir o timezone para Brasília em toda a aplicação
         date_default_timezone_set('America/Sao_Paulo');
         
