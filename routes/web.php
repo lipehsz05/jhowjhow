@@ -52,10 +52,9 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/users/{user}', [\App\Http\Controllers\AdminController::class, 'destroy'])->name('users.destroy');
     });
 
-    // Categorias sob /inventory/* (mesmo prefixo do estoque — evita 404 em hosts que filtram /categories na raiz)
-    Route::get('/inventory/categories/create', [CategoriaController::class, 'create'])->name('categories.create');
-    Route::post('/inventory/categories', [CategoriaController::class, 'store'])->name('categories.store');
-    Route::redirect('/categories/create', '/inventory/categories/create');
+    Route::get('/categories/create', [CategoriaController::class, 'create'])->name('categories.create');
+    Route::post('/categories', [CategoriaController::class, 'store'])->name('categories.store');
+    Route::redirect('/inventory/categories/create', '/categories/create');
 
     // Estoque
     Route::prefix('inventory')->name('inventory.')->group(function () {

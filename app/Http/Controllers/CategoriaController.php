@@ -7,17 +7,11 @@ use Illuminate\Http\Request;
 
 class CategoriaController extends Controller
 {
-    /**
-     * Formulário para cadastrar uma nova categoria.
-     */
     public function create()
     {
         return view('categories.create');
     }
 
-    /**
-     * Persiste a nova categoria.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -33,7 +27,7 @@ class CategoriaController extends Controller
 
         Categoria::create($validated);
 
-        return redirect('/inventory/categories/create')
+        return redirect('/categories/create')
             ->with('success', 'Categoria cadastrada com sucesso.');
     }
 }
