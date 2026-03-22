@@ -28,7 +28,11 @@ class ClientController extends Controller
             });
         }
 
-        $clientes = $query->orderBy('nome')->paginate(15)->withQueryString();
+        $clientes = $query
+            ->withCount('vendas')
+            ->orderBy('nome')
+            ->paginate(15)
+            ->withQueryString();
 
         return view('clients.index', compact('clientes'));
     }
