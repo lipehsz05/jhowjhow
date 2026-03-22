@@ -11,8 +11,7 @@ use App\Http\Controllers\DevToolsController;
 use App\Http\Controllers\SalesController;
 use Illuminate\Support\Facades\Route;
 
-// Ícone da aba: muitos browsers pedem /favicon.ico antes de ler o <link rel="icon">
-Route::get('/favicon.ico', function () {
+$faviconPng = function () {
     $path = public_path('logo/jhow-jhow-mark.png');
     abort_unless(is_file($path), 404);
 
@@ -20,10 +19,13 @@ Route::get('/favicon.ico', function () {
         'Content-Type' => 'image/png',
         'Cache-Control' => 'public, max-age=604800, immutable',
     ]);
-})->name('favicon');
+};
 
-// Logos em public/logo — funciona mesmo se o servidor mandar tudo para o index.php ou sem auth
-Route::get('/logo/{filename}', function (string $filename) {
+// Ícone da aba — com ou sem /public/ na URL da hospedagem
+Route::get('/favicon.ico', $faviconPng)->name('favicon');
+Route::get('/public/favicon.ico', $faviconPng)->name('favicon.public_dir');
+
+$servirLogoPublic = function (string $filename) {
     if (str_contains($filename, '..') || str_contains($filename, '/')) {
         abort(404);
     }
@@ -44,7 +46,13 @@ Route::get('/logo/{filename}', function (string $filename) {
         'Content-Type' => $mime,
         'Cache-Control' => 'public, max-age=604800, immutable',
     ]);
-})->where('filename', '[A-Za-z0-9._-]+\.(png|jpg|jpeg|gif|svg|webp)')->name('public.logo');
+};
+
+$logoFilenamePattern = '[A-Za-z0-9._-]+\.(png|jpg|jpeg|gif|svg|webp)';
+
+// Logos em public/logo — /logo/... e /public/logo/... (hospedagem compartilhada)
+Route::get('/logo/{filename}', $servirLogoPublic)->where('filename', $logoFilenamePattern)->name('public.logo');
+Route::get('/public/logo/{filename}', $servirLogoPublic)->where('filename', $logoFilenamePattern)->name('public.logo.in_public');
 
 // Rotas de autenticação (sem middleware para evitar loops)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login')->withoutMiddleware(\App\Http\Middleware\RoleRedirect::class);

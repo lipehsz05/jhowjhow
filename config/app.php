@@ -56,6 +56,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Asset URL (opcional)
+    |--------------------------------------------------------------------------
+    |
+    | Base absoluta para logos, CSS em public/. Ex.: https://dominio.com/public
+    |
+    */
+
+    'asset_url' => env('ASSET_URL'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Prefixo de URL até a pasta public (hospedagem compartilhada)
+    |--------------------------------------------------------------------------
+    |
+    | Se as imagens abrem em https://site.com/public/logo/... mas getBasePath()
+    | vier vazio, defina PUBLIC_PATH_PREFIX=public (sem barras).
+    |
+    */
+
+    'public_path_prefix' => env('PUBLIC_PATH_PREFIX', ''),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

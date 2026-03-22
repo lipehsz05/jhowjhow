@@ -26,8 +26,13 @@ class RoleRedirect
             return $next($request);
         }
 
-        // Logos e imagens públicas em /logo/* (login, favicon, metatags) — visitantes não autenticados
-        if ($request->is('logo') || $request->is('logo/*')) {
+        // Logos e imagens públicas — visitantes não autenticados (com ou sem /public/ na URL)
+        if ($request->is('logo') || $request->is('logo/*')
+            || $request->is('public/logo') || $request->is('public/logo/*')) {
+            return $next($request);
+        }
+
+        if ($request->is('public/favicon.ico')) {
             return $next($request);
         }
         
