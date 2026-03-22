@@ -18,7 +18,7 @@
             </a>
         </li>
         <li>
-            <a href="{{ url('/categories/create') }}" class="{{ request()->is('categories/create') || request()->routeIs('categories.*') ? 'active' : '' }}">
+            <a href="{{ url('/inventory/categories/create') }}" class="{{ request()->is('inventory/categories/create') || request()->routeIs('categories.*') ? 'active' : '' }}">
                 <i class="fas fa-folder-plus"></i>
                 <span>Nova categoria</span>
             </a>

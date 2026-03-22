@@ -42,7 +42,7 @@
                 </div>
             @endif
 
-            <form action="{{ url('/categories') }}" method="POST">
+            <form action="{{ url('/inventory/categories') }}" method="POST">
                 @csrf
 
                 <div class="row">
