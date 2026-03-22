@@ -25,6 +25,11 @@ class RoleRedirect
         if ($request->is('favicon.ico')) {
             return $next($request);
         }
+
+        // Logos e imagens públicas em /logo/* (login, favicon, metatags) — visitantes não autenticados
+        if ($request->is('logo') || $request->is('logo/*')) {
+            return $next($request);
+        }
         
         // Verificar se o usuário está autenticado
         if (!Auth::check()) {

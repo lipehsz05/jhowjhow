@@ -22,6 +22,30 @@ Route::get('/favicon.ico', function () {
     ]);
 })->name('favicon');
 
+// Logos em public/logo — funciona mesmo se o servidor mandar tudo para o index.php ou sem auth
+Route::get('/logo/{filename}', function (string $filename) {
+    if (str_contains($filename, '..') || str_contains($filename, '/')) {
+        abort(404);
+    }
+    $path = public_path('logo/'.$filename);
+    abort_unless(is_file($path), 404);
+
+    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    $mime = match ($ext) {
+        'png' => 'image/png',
+        'jpg', 'jpeg' => 'image/jpeg',
+        'gif' => 'image/gif',
+        'svg' => 'image/svg+xml',
+        'webp' => 'image/webp',
+        default => 'application/octet-stream',
+    };
+
+    return response()->file($path, [
+        'Content-Type' => $mime,
+        'Cache-Control' => 'public, max-age=604800, immutable',
+    ]);
+})->where('filename', '[A-Za-z0-9._-]+\.(png|jpg|jpeg|gif|svg|webp)')->name('public.logo');
+
 // Rotas de autenticação (sem middleware para evitar loops)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login')->withoutMiddleware(\App\Http\Middleware\RoleRedirect::class);
 Route::post('/login', [AuthController::class, 'login'])->withoutMiddleware(\App\Http\Middleware\RoleRedirect::class);
