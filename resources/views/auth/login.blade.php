@@ -258,6 +258,18 @@
             transform: translateY(0);
             box-shadow: var(--shadow-sm);
         }
+
+        .login-button:disabled {
+            opacity: 0.85;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .login-button:disabled:hover {
+            transform: none;
+            box-shadow: var(--shadow-sm);
+        }
         
         .login-button::before {
             content: '';
@@ -347,7 +359,7 @@
                 <p class="text-muted mb-4">Gestão de Estoque e Vendas</p>
             </div>
         
-        <form method="POST" action="{{ route('login') }}" class="login-form">
+        <form method="POST" action="{{ route('login') }}" class="login-form" id="login-form">
             @csrf
             
             <div class="login-form-group">
@@ -386,8 +398,8 @@
                 </label>
             </div>
             
-            <button type="submit" class="login-button">
-                <i class="fas fa-sign-in-alt"></i>Entrar
+            <button type="submit" class="login-button" id="login-submit-btn">
+                <i class="fas fa-sign-in-alt login-btn-icon" aria-hidden="true"></i><span class="login-btn-text">Entrar</span>
             </button>
             
             <div class="login-footer mt-4 text-center">
@@ -410,6 +422,28 @@
     
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('login-form');
+        const loginSubmitBtn = document.getElementById('login-submit-btn');
+        if (loginForm && loginSubmitBtn) {
+            loginForm.addEventListener('submit', function (e) {
+                if (loginForm.dataset.locked === 'true') {
+                    e.preventDefault();
+                    return false;
+                }
+                loginForm.dataset.locked = 'true';
+                loginSubmitBtn.disabled = true;
+                const icon = loginSubmitBtn.querySelector('.login-btn-icon');
+                const text = loginSubmitBtn.querySelector('.login-btn-text');
+                if (icon) {
+                    icon.className = 'fas fa-spinner fa-spin login-btn-icon';
+                }
+                if (text) {
+                    text.textContent = 'Entrando...';
+                }
+                loginSubmitBtn.setAttribute('aria-busy', 'true');
+            });
+        }
+
         // Script para o mostrador de senha
         const passwordInput = document.getElementById('password');
         const togglePassword = document.getElementById('password-toggle');

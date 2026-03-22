@@ -52,11 +52,9 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/users/{user}', [\App\Http\Controllers\AdminController::class, 'destroy'])->name('users.destroy');
     });
 
-    // Categorias (cadastro)
-    Route::prefix('categories')->name('categories.')->group(function () {
-        Route::get('/create', [CategoriaController::class, 'create'])->name('create');
-        Route::post('/', [CategoriaController::class, 'store'])->name('store');
-    });
+    // Categorias (cadastro) — nomes explícitos: categories.create, categories.store
+    Route::get('/categories/create', [CategoriaController::class, 'create'])->name('categories.create');
+    Route::post('/categories', [CategoriaController::class, 'store'])->name('categories.store');
 
     // Estoque
     Route::prefix('inventory')->name('inventory.')->group(function () {
