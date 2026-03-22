@@ -94,4 +94,25 @@ class User extends Authenticatable
     {
         return $this->nivel_acesso === 'estoquista';
     }
+
+    /**
+     * Conta de desenvolvedor (nível acima do dono; atribuído só fora do painel do dono).
+     */
+    public function isDev(): bool
+    {
+        return $this->nivel_acesso === 'dev';
+    }
+
+    public function isDono(): bool
+    {
+        return $this->nivel_acesso === 'dono';
+    }
+
+    /**
+     * Acesso equivalente ao dono no painel (dono ou desenvolvedor).
+     */
+    public function hasDonoLevelAccess(): bool
+    {
+        return in_array($this->nivel_acesso, ['dono', 'dev'], true);
+    }
 }

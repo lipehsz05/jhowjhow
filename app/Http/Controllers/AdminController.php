@@ -22,9 +22,8 @@ class AdminController extends Controller
             'estoquista' => 'Estoquista (Acesso ao Estoque)'
         ];
         
-        // Adiciona a opção 'dono' apenas se o usuário logado for dono
-        // Administradores não podem criar donos, apenas o dono pode criar outro dono
-        if (Auth::user() && Auth::user()->nivel_acesso === 'dono') {
+        // Dono ou DEV podem criar outro dono; o cargo DEV nunca aparece aqui (só via sistema)
+        if (Auth::user() && Auth::user()->hasDonoLevelAccess()) {
             $cargos['dono'] = 'Dono (Acesso Máximo ao Sistema)';
         }
         
@@ -37,25 +36,31 @@ class AdminController extends Controller
     public function store(Request $request)
     {
         $currentUser = Auth::user();
-        
-        // Verificar se está tentando criar um usuário dono e tem permissão
-        if ($request->cargo == 'dono' && (!$currentUser || $currentUser->nivel_acesso != 'dono')) {
+
+        if ($request->cargo === 'dev') {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Apenas o dono pode criar usuários com este nível de acesso.');
+                ->with('error', 'O cargo DEV não pode ser atribuído por esta tela. Use o comando `php artisan user:promote-dev` ou o banco de dados.');
+        }
+        
+        // Verificar se está tentando criar um usuário dono e tem permissão
+        if ($request->cargo == 'dono' && (!$currentUser || ! $currentUser->hasDonoLevelAccess())) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Apenas dono ou desenvolvedor podem criar usuários com este nível de acesso.');
         }
         
         // Verificar se está tentando criar um administrador sem ter permissão adequada
         // Administradores podem criar outros administradores
-        if ($request->cargo == 'administrador' && (!$currentUser || !in_array($currentUser->nivel_acesso, ['dono', 'administrador']))) {
+        if ($request->cargo == 'administrador' && (!$currentUser || !in_array($currentUser->nivel_acesso, ['dono', 'dev', 'administrador']))) {
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Você não tem permissão para criar administradores.');
         }
         
         // Determinar os cargos permitidos com base no nível de acesso do usuário
-        $cargos_permitidos = $currentUser->nivel_acesso === 'dono' 
-            ? 'administrador,vendedor,estoquista,dono' 
+        $cargos_permitidos = $currentUser && $currentUser->hasDonoLevelAccess()
+            ? 'administrador,vendedor,estoquista,dono'
             : 'administrador,vendedor,estoquista';
             
         $validator = Validator::make($request->all(), [
@@ -102,9 +107,10 @@ class AdminController extends Controller
      */
     public function index()
     {
-        $users = User::orderBy('nivel_acesso', 'asc')
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+        $users = User::query()
+            ->orderByRaw("CASE nivel_acesso WHEN 'dev' THEN 0 WHEN 'dono' THEN 1 WHEN 'administrador' THEN 2 WHEN 'vendedor' THEN 3 WHEN 'estoquista' THEN 4 ELSE 5 END")
+            ->orderBy('created_at', 'desc')
+            ->get();
                     
         $currentUser = Auth::user();
         return view('admin.users.index', compact('users', 'currentUser'));
@@ -115,6 +121,11 @@ class AdminController extends Controller
      */
     public function edit(User $user)
     {
+        if ($user->isDev() && ! Auth::user()->isDev()) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Apenas desenvolvedores podem editar usuários com cargo DEV.');
+        }
+
         return view('admin.users.edit', compact('user'));
     }
     
@@ -124,31 +135,36 @@ class AdminController extends Controller
     public function update(Request $request, User $user)
     {
         $currentUser = Auth::user();
+
+        if ($request->filled('cargo') && $request->cargo === 'dev') {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'O cargo DEV não pode ser alterado por esta tela.');
+        }
         
         // Verificar se tem permissão para editar
-        if ($user->nivel_acesso == 'administrador' && $currentUser->nivel_acesso != 'dono' && $user->id != $currentUser->id) {
+        if ($user->nivel_acesso == 'administrador' && ! $currentUser->hasDonoLevelAccess() && $user->id != $currentUser->id) {
             return redirect()->route('admin.users.index')
-                ->with('error', 'Apenas o dono do sistema pode editar outros administradores.');
+                ->with('error', 'Apenas o dono ou desenvolvedor do sistema pode editar outros administradores.');
         }
         
         // Verificar se está tentando mudar o próprio cargo
-        if ($user->id == $currentUser->id && $request->cargo != $user->nivel_acesso) {
+        if ($user->id == $currentUser->id && $request->filled('cargo') && $request->cargo != $user->nivel_acesso) {
             return redirect()->route('admin.users.index')
                 ->with('error', 'Você não pode alterar seu próprio cargo.');
         }
         
         // Verificar se está tentando definir alguém como dono
-        if ($request->cargo == 'dono' && $currentUser->nivel_acesso != 'dono') {
+        if ($request->cargo == 'dono' && ! $currentUser->hasDonoLevelAccess()) {
             return redirect()->route('admin.users.index')
-                ->with('error', 'Apenas o dono pode atribuir este nível de acesso.');
+                ->with('error', 'Apenas dono ou desenvolvedor pode atribuir este nível de acesso.');
         }
         
         $rules = [
             'name' => 'required|string|max:255',
         ];
         
-        // Adicionar validação para cargo apenas se não estiver editando o próprio usuário
-        if ($user->id != $currentUser->id) {
+        // Cargo DEV permanece fixo; demais usuários seguem a lista abaixo
+        if ($user->id != $currentUser->id && $user->nivel_acesso !== 'dev') {
             $rules['cargo'] = 'required|string|in:administrador,vendedor,estoquista,dono';
         }
         
@@ -172,8 +188,8 @@ class AdminController extends Controller
             'name' => $request->name,
         ];
         
-        // Atualizar cargo apenas se não estiver editando o próprio usuário
-        if ($user->id != $currentUser->id && isset($request->cargo)) {
+        // Atualizar cargo apenas se não estiver editando o próprio usuário (DEV não muda pelo painel)
+        if ($user->id != $currentUser->id && isset($request->cargo) && $user->nivel_acesso !== 'dev') {
             $userData['nivel_acesso'] = $request->cargo;
         }
         
@@ -200,16 +216,21 @@ class AdminController extends Controller
             return redirect()->route('admin.users.index')->with('error', 'Você não pode excluir seu próprio usuário!');
         }
         
-        // Verificar se tem permissão para excluir
-        if ($user->nivel_acesso == 'administrador' && $currentUser->nivel_acesso != 'dono') {
+        if ($user->nivel_acesso == 'dev' && ! $currentUser->isDev()) {
             return redirect()->route('admin.users.index')
-                ->with('error', 'Apenas o dono do sistema pode excluir administradores.');
+                ->with('error', 'Apenas desenvolvedores podem excluir usuários com cargo DEV.');
+        }
+
+        // Verificar se tem permissão para excluir
+        if ($user->nivel_acesso == 'administrador' && ! $currentUser->hasDonoLevelAccess()) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Apenas o dono ou desenvolvedor do sistema pode excluir administradores.');
         }
         
-        // Ninguém pode excluir o dono
-        if ($user->nivel_acesso == 'dono') {
+        // Dono não pode excluir outro dono; desenvolvedor pode (suporte / contingência)
+        if ($user->nivel_acesso == 'dono' && ! $currentUser->isDev()) {
             return redirect()->route('admin.users.index')
-                ->with('error', 'O usuário dono do sistema não pode ser excluído.');
+                ->with('error', 'O usuário dono do sistema não pode ser excluído por esta conta.');
         }
         
         $user->delete();

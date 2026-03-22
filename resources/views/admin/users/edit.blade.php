@@ -50,23 +50,29 @@
 
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label for="cargo" class="form-label mb-2"><i class="fas fa-user-tag me-1"></i> Cargo do Usuário</label>
-                        <div class="input-group mb-3">
-                            <span class="input-group-text bg-primary text-white"><i class="fas fa-briefcase"></i></span>
-                            <select class="form-select custom-select" id="cargo" name="cargo" {{ Auth::id() == $user->id ? 'disabled' : 'required' }}>
-                                <option value="">Selecione um cargo</option>
-                                <option value="administrador" {{ old('cargo', $user->nivel_acesso) == 'administrador' ? 'selected' : '' }}>Administrador</option>
-                                <option value="vendedor" {{ old('cargo', $user->nivel_acesso) == 'vendedor' ? 'selected' : '' }}>Vendedor</option>
-                                <option value="estoquista" {{ old('cargo', $user->nivel_acesso) == 'estoquista' ? 'selected' : '' }}>Estoquista</option>
-                                @if(Auth::user()->nivel_acesso == 'dono')
-                                    <option value="dono" {{ old('cargo', $user->nivel_acesso) == 'dono' ? 'selected' : '' }}>Dono</option>
-                                @endif
-                            </select>
-                        </div>
-                        @if(Auth::id() == $user->id)
-                            <div class="form-text text-danger"><i class="fas fa-exclamation-triangle"></i> Você não pode alterar seu próprio cargo.</div>
-                        @elseif($user->nivel_acesso == 'administrador' && Auth::user()->nivel_acesso != 'dono')
-                            <div class="form-text text-danger"><i class="fas fa-exclamation-triangle"></i> Apenas o dono pode editar administradores.</div>
+                        <label class="form-label mb-2"><i class="fas fa-user-tag me-1"></i> Cargo do Usuário</label>
+                        @if($user->nivel_acesso === 'dev')
+                            <div class="alert alert-secondary mb-0">
+                                <strong>DEV</strong> — nível acima do dono, atribuído apenas pelo sistema (ex.: <code>php artisan user:promote-dev</code>). O cargo não pode ser alterado por esta tela.
+                            </div>
+                        @else
+                            <div class="input-group mb-3">
+                                <span class="input-group-text bg-primary text-white"><i class="fas fa-briefcase"></i></span>
+                                <select class="form-select custom-select" id="cargo" name="cargo" {{ Auth::id() == $user->id ? 'disabled' : 'required' }}>
+                                    <option value="">Selecione um cargo</option>
+                                    <option value="administrador" {{ old('cargo', $user->nivel_acesso) == 'administrador' ? 'selected' : '' }}>Administrador</option>
+                                    <option value="vendedor" {{ old('cargo', $user->nivel_acesso) == 'vendedor' ? 'selected' : '' }}>Vendedor</option>
+                                    <option value="estoquista" {{ old('cargo', $user->nivel_acesso) == 'estoquista' ? 'selected' : '' }}>Estoquista</option>
+                                    @if(Auth::user()->hasDonoLevelAccess())
+                                        <option value="dono" {{ old('cargo', $user->nivel_acesso) == 'dono' ? 'selected' : '' }}>Dono</option>
+                                    @endif
+                                </select>
+                            </div>
+                            @if(Auth::id() == $user->id)
+                                <div class="form-text text-danger"><i class="fas fa-exclamation-triangle"></i> Você não pode alterar seu próprio cargo.</div>
+                            @elseif($user->nivel_acesso == 'administrador' && !Auth::user()->hasDonoLevelAccess())
+                                <div class="form-text text-danger"><i class="fas fa-exclamation-triangle"></i> Apenas dono ou desenvolvedor pode editar administradores.</div>
+                            @endif
                         @endif
                     </div>
                 </div>

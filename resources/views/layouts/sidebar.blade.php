@@ -1,7 +1,7 @@
 <nav class="sidebar-nav">
     <ul>
         {{-- Dashboard: acessível para administrador e dono --}}
-        @if (Auth::user()->nivel_acesso === 'administrador' || Auth::user()->nivel_acesso === 'dono')
+        @if (Auth::user()->nivel_acesso === 'administrador' || Auth::user()->hasDonoLevelAccess())
         <li>
             <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <i class="fas fa-chart-line"></i>
@@ -25,7 +25,7 @@
         </li>
         
         {{-- Vendas: acessível para administrador, dono e vendedor --}}
-        @if (Auth::user()->nivel_acesso === 'administrador' || Auth::user()->nivel_acesso === 'dono' || Auth::user()->nivel_acesso === 'vendedor')
+        @if (Auth::user()->nivel_acesso === 'administrador' || Auth::user()->hasDonoLevelAccess() || Auth::user()->nivel_acesso === 'vendedor')
         <li>
             <a href="{{ route('sales.index') }}" class="{{ request()->routeIs('sales.*') ? 'active' : '' }}">
                 <i class="fas fa-cash-register"></i>
@@ -41,7 +41,7 @@
         @endif
         
         {{-- Histórico: acessível para administrador, dono e vendedor --}}
-        @if (Auth::user()->nivel_acesso === 'administrador' || Auth::user()->nivel_acesso === 'dono' || Auth::user()->nivel_acesso === 'vendedor')
+        @if (Auth::user()->nivel_acesso === 'administrador' || Auth::user()->hasDonoLevelAccess() || Auth::user()->nivel_acesso === 'vendedor')
         <li>
             <a href="{{ route('history.index') }}" class="{{ request()->routeIs('history.*') ? 'active' : '' }}">
                 <i class="fas fa-history"></i>
@@ -51,7 +51,7 @@
         @endif
         
         {{-- Movimentações: acessível para administrador, dono e estoquista --}}
-        @if (Auth::user()->nivel_acesso === 'administrador' || Auth::user()->nivel_acesso === 'dono' || Auth::user()->nivel_acesso === 'estoquista')
+        @if (Auth::user()->nivel_acesso === 'administrador' || Auth::user()->hasDonoLevelAccess() || Auth::user()->nivel_acesso === 'estoquista')
         <li>
             <a href="{{ route('inventory.movimentacoes.index') }}" class="{{ request()->routeIs('inventory.movimentacoes.*') ? 'active' : '' }}">
                 <i class="fas fa-exchange-alt"></i>

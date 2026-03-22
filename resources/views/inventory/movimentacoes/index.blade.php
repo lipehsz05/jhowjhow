@@ -18,7 +18,7 @@
                     Histórico de Movimentações
                 </div>
                 <div>
-                    @if(Auth::user()->nivel_acesso === 'administrador' || Auth::user()->nivel_acesso === 'estoquista' || Auth::user()->nivel_acesso === 'dono')
+                    @if(Auth::user()->nivel_acesso === 'administrador' || Auth::user()->nivel_acesso === 'estoquista' || Auth::user()->hasDonoLevelAccess())
                         <a href="{{ route('inventory.movimentacoes.entrada.create') }}" class="btn btn-success btn-sm me-2">
                             <i class="fas fa-plus"></i> Nova Entrada
                         </a>

@@ -544,14 +544,18 @@
                                 {{ $usuario->name }}
                             </div>
                             <div class="client-info">
-                                <span class="badge
-                                    @if($usuario->nivel_acesso == 'dono') bg-dark
-                                    @elseif($usuario->nivel_acesso == 'administrador') bg-primary
-                                    @elseif($usuario->nivel_acesso == 'vendedor') bg-success
-                                    @elseif($usuario->nivel_acesso == 'estoquista') bg-info
-                                    @else bg-secondary @endif">
-                                    {{ ucfirst($usuario->nivel_acesso) }}
-                                </span>
+                                @if($usuario->nivel_acesso == 'dev')
+                                    <span class="badge text-white" style="background:#6f42c1;">DEV</span>
+                                @else
+                                    <span class="badge text-white
+                                        @if($usuario->nivel_acesso == 'dono') bg-dark
+                                        @elseif($usuario->nivel_acesso == 'administrador') bg-primary
+                                        @elseif($usuario->nivel_acesso == 'vendedor') bg-success
+                                        @elseif($usuario->nivel_acesso == 'estoquista') bg-info
+                                        @else bg-secondary @endif">
+                                        {{ ucfirst($usuario->nivel_acesso) }}
+                                    </span>
+                                @endif
                                 <small class="text-muted ms-2" title="Última atividade">Online</small>
                             </div>
                         </li>

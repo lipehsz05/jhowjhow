@@ -87,7 +87,7 @@
                         
                         <div class="mb-3">
                             <label for="cargo" class="form-label">Cargo</label>
-                            <input type="text" class="form-control" id="cargo" value="{{ ucfirst(Auth::user()->nivel_acesso) }}" disabled readonly>
+                            <input type="text" class="form-control" id="cargo" value="{{ Auth::user()->nivel_acesso === 'dev' ? 'DEV' : ucfirst(Auth::user()->nivel_acesso) }}" disabled readonly>
                             <div class="form-text">Seu cargo atual no sistema.</div>
                         </div>
                         
