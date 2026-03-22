@@ -42,7 +42,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('categories.store') }}" method="POST">
+            <form action="{{ url('/categories') }}" method="POST">
                 @csrf
 
                 <div class="row">

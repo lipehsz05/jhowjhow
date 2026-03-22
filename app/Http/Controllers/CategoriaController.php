@@ -33,8 +33,7 @@ class CategoriaController extends Controller
 
         Categoria::create($validated);
 
-        return redirect()
-            ->route('categories.create')
+        return redirect('/categories/create')
             ->with('success', 'Categoria cadastrada com sucesso.');
     }
 }
