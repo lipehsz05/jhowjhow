@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login - {{ config('app.name', 'Sistema JhowJhow') }}</title>
     @php
-        $__favicon = asset('logo/jhow-jhow-mark.png');
+        $__favicon = '/logo/jhow-jhow-mark.png';
         if (is_file(public_path('logo/jhow-jhow-mark.png'))) {
             $__favicon .= '?v='.filemtime(public_path('logo/jhow-jhow-mark.png'));
         }

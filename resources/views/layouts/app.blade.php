@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@hasSection('title')@yield('title') — {{ $layoutSiteTitle ?? config('app.name', 'Sistema JhowJhow') }}@else{{ $layoutSiteTitle ?? config('app.name', 'Sistema JhowJhow') }}@endif</title>
     @php
-        $__favicon = asset('logo/jhow-jhow-mark.png');
+        $__favicon = '/logo/jhow-jhow-mark.png';
         if (is_file(public_path('logo/jhow-jhow-mark.png'))) {
             $__favicon .= '?v='.filemtime(public_path('logo/jhow-jhow-mark.png'));
         }
@@ -1383,7 +1383,7 @@
             <div class="sidebar-brand">
                 <img
                     class="sidebar-brand__mark"
-                    src="{{ asset('logo/jhow-jhow-mark.png') }}"
+                    src="/logo/jhow-jhow-mark.png"
                     width="120"
                     height="120"
                     alt="Ícone"
@@ -1392,7 +1392,7 @@
                     decoding="async">
                 <img
                     class="sidebar-brand__wordmark"
-                    src="{{ asset('logo/jhow-jhow-wordmark.png') }}"
+                    src="/logo/jhow-jhow-wordmark.png"
                     width="280"
                     height="80"
                     alt="Logo"
