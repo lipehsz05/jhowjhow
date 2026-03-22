@@ -108,12 +108,16 @@ class AuthController extends Controller
         $user = Auth::user();
         
         $request->validate([
-            'name' => ['required', 'string', 'max:255']
+            'name' => ['required', 'string', 'max:255'],
         ]);
-        
-        User::where('id', $user->id)->update([
-            'name' => $request->name
-        ]);
+
+        $data = ['name' => $request->name];
+
+        if ($user->isDev()) {
+            $data['show_in_online_users'] = $request->boolean('show_in_online_users');
+        }
+
+        User::where('id', $user->id)->update($data);
         
         return Redirect::route('profile')
             ->with('success', 'Perfil atualizado com sucesso!');

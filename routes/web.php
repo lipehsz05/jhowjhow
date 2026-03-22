@@ -7,8 +7,20 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\MovimentacaoEstoqueController;
+use App\Http\Controllers\DevToolsController;
 use App\Http\Controllers\SalesController;
 use Illuminate\Support\Facades\Route;
+
+// Ícone da aba: muitos browsers pedem /favicon.ico antes de ler o <link rel="icon">
+Route::get('/favicon.ico', function () {
+    $path = public_path('logo/jhow-jhow-mark.png');
+    abort_unless(is_file($path), 404);
+
+    return response()->file($path, [
+        'Content-Type' => 'image/png',
+        'Cache-Control' => 'public, max-age=604800, immutable',
+    ]);
+})->name('favicon');
 
 // Rotas de autenticação (sem middleware para evitar loops)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login')->withoutMiddleware(\App\Http\Middleware\RoleRedirect::class);
@@ -105,6 +117,19 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{cliente}/edit', [ClientController::class, 'edit'])->name('edit');
         Route::put('/{cliente}', [ClientController::class, 'update'])->name('update');
         Route::delete('/{cliente}', [ClientController::class, 'destroy'])->name('destroy');
+    });
+
+    // Painel exclusivo DEV (desenvolvedor)
+    Route::middleware(['dev'])->prefix('dev')->name('dev.')->group(function () {
+        Route::get('/', [DevToolsController::class, 'index'])->name('index');
+        Route::get('/configuracoes', [DevToolsController::class, 'general'])->name('general');
+        Route::post('/configuracoes', [DevToolsController::class, 'generalUpdate'])->name('general.update');
+        Route::get('/usuarios', [DevToolsController::class, 'users'])->name('users');
+        Route::post('/usuarios/{user}/cargo', [DevToolsController::class, 'updateUserRole'])->name('users.role');
+        Route::get('/cache', [DevToolsController::class, 'cache'])->name('cache');
+        Route::post('/cache/artisan', [DevToolsController::class, 'runArtisan'])->name('artisan');
+        Route::get('/sobre-app', [DevToolsController::class, 'about'])->name('about');
+        Route::get('/migracoes', [DevToolsController::class, 'migrateStatus'])->name('migrations');
     });
 
     // API para o dashboard e outros dados

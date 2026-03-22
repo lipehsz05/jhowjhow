@@ -5,9 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login - {{ config('app.name', 'Sistema JhowJhow') }}</title>
-    <link rel="icon" type="image/png" href="/logo/jhow-jhow-mark.png">
-    <link rel="shortcut icon" type="image/png" href="/logo/jhow-jhow-mark.png">
-    <link rel="apple-touch-icon" href="/logo/jhow-jhow-mark.png">
+    @php
+        $__favicon = asset('logo/jhow-jhow-mark.png');
+        if (is_file(public_path('logo/jhow-jhow-mark.png'))) {
+            $__favicon .= '?v='.filemtime(public_path('logo/jhow-jhow-mark.png'));
+        }
+    @endphp
+    <link rel="icon" type="image/png" href="{{ $__favicon }}" sizes="any">
+    <link rel="shortcut icon" type="image/png" href="{{ $__favicon }}">
+    <link rel="apple-touch-icon" href="{{ $__favicon }}">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

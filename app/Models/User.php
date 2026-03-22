@@ -25,7 +25,8 @@ class User extends Authenticatable
         'ultimo_acesso',
         'nivel_acesso',
         'last_activity',
-        'is_online'
+        'is_online',
+        'show_in_online_users',
     ];
 
     /**
@@ -50,6 +51,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'last_activity' => 'datetime',
             'is_online' => 'boolean',
+            'show_in_online_users' => 'boolean',
         ];
     }
     

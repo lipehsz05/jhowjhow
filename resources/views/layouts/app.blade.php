@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Sistema JhowJhow') }}</title>
-    <link rel="icon" type="image/png" href="/logo/jhow-jhow-mark.png">
-    <link rel="shortcut icon" type="image/png" href="/logo/jhow-jhow-mark.png">
-    <link rel="apple-touch-icon" href="/logo/jhow-jhow-mark.png">
+    <title>@hasSection('title')@yield('title') — {{ $layoutSiteTitle ?? config('app.name', 'Sistema JhowJhow') }}@else{{ $layoutSiteTitle ?? config('app.name', 'Sistema JhowJhow') }}@endif</title>
+    @php
+        $__favicon = asset('logo/jhow-jhow-mark.png');
+        if (is_file(public_path('logo/jhow-jhow-mark.png'))) {
+            $__favicon .= '?v='.filemtime(public_path('logo/jhow-jhow-mark.png'));
+        }
+    @endphp
+    <link rel="icon" type="image/png" href="{{ $__favicon }}" sizes="any">
+    <link rel="shortcut icon" type="image/png" href="{{ $__favicon }}">
+    <link rel="apple-touch-icon" href="{{ $__favicon }}">
     
     <!-- CSS Interno (Solução emergencial) - Design Moderno -->
     <style>
@@ -26,6 +32,33 @@
             --body-bg: #f0f0f2;
             --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
             --transition: all 0.3s ease;
+            /* Scrollbar (fallback se color-mix não existir) */
+            --scrollbar-site-track: #e4e4e8;
+            --scrollbar-site-thumb: #3f3f46;
+            --scrollbar-site-thumb-hover: #27272a;
+            --scrollbar-sidebar-track: rgba(255, 255, 255, 0.06);
+            --scrollbar-sidebar-thumb: rgba(255, 255, 255, 0.3);
+            --scrollbar-sidebar-thumb-hover: rgba(255, 255, 255, 0.48);
+            --scrollbar-size: 10px;
+            --scrollbar-size-thin: 7px;
+        }
+
+        /* Sobrescreve tema quando definido no painel DEV (site_settings) */
+        :root {
+            --primary: {{ $layoutPrimaryColor ?? '#0a0a0a' }};
+            --primary-dark: {{ $layoutPrimaryDark ?? '#000000' }};
+            --dark: {{ $layoutPrimaryColor ?? '#0a0a0a' }};
+            --body-bg: {{ $layoutBodyBg ?? '#f0f0f2' }};
+            /* Barras de rolagem — derivam do tema (área principal clara) */
+            --scrollbar-site-track: color-mix(in srgb, var(--body-bg) 90%, var(--primary) 10%);
+            --scrollbar-site-thumb: color-mix(in srgb, var(--primary) 40%, var(--body-bg) 60%);
+            --scrollbar-site-thumb-hover: color-mix(in srgb, var(--primary) 62%, var(--body-bg) 38%);
+            /* Sidebar escura: trilho sutil, thumb claro */
+            --scrollbar-sidebar-track: rgba(255, 255, 255, 0.06);
+            --scrollbar-sidebar-thumb: rgba(255, 255, 255, 0.3);
+            --scrollbar-sidebar-thumb-hover: rgba(255, 255, 255, 0.48);
+            --scrollbar-size: 10px;
+            --scrollbar-size-thin: 7px;
         }
         
         /* Estilos básicos */
@@ -54,9 +87,65 @@
             position: relative;
         }
 
+        /* Scrollbar — área principal / página (Firefox) */
+        html {
+            scrollbar-gutter: stable;
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-site-thumb) var(--scrollbar-site-track);
+        }
+        /* Scrollbar — área principal (Chrome, Edge, Safari) */
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            width: var(--scrollbar-size);
+            height: var(--scrollbar-size);
+        }
+        html::-webkit-scrollbar-track,
+        body::-webkit-scrollbar-track {
+            background: var(--scrollbar-site-track);
+            border-radius: 999px;
+        }
+        html::-webkit-scrollbar-thumb,
+        body::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-site-thumb);
+            border-radius: 999px;
+            border: 2px solid var(--scrollbar-site-track);
+        }
+        html::-webkit-scrollbar-thumb:hover,
+        body::-webkit-scrollbar-thumb:hover {
+            background: var(--scrollbar-site-thumb-hover);
+        }
+        html::-webkit-scrollbar-corner,
+        body::-webkit-scrollbar-corner {
+            background: var(--scrollbar-site-track);
+        }
+
+        main.overflow-y-auto {
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-site-thumb) var(--scrollbar-site-track);
+        }
+        main.overflow-y-auto::-webkit-scrollbar {
+            width: var(--scrollbar-size);
+            height: var(--scrollbar-size);
+        }
+        main.overflow-y-auto::-webkit-scrollbar-track {
+            background: var(--scrollbar-site-track);
+            border-radius: 999px;
+        }
+        main.overflow-y-auto::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-site-thumb);
+            border-radius: 999px;
+            border: 2px solid var(--scrollbar-site-track);
+        }
+        main.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: var(--scrollbar-site-thumb-hover);
+        }
+        main.overflow-y-auto::-webkit-scrollbar-corner {
+            background: var(--scrollbar-site-track);
+        }
+
         /* Sidebar estilizada */
         .sidebar {
-            background: linear-gradient(180deg, #0a0a0a 0%, #141414 100%);
+            background: linear-gradient(180deg, var(--primary) 0%, #141414 100%);
             color: #ffffff;
             width: 250px;
             height: 100vh;
@@ -75,6 +164,23 @@
             margin-top: 0;
             flex: 1;
             overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-sidebar-thumb) var(--scrollbar-sidebar-track);
+        }
+        .sidebar-nav::-webkit-scrollbar {
+            width: var(--scrollbar-size-thin);
+        }
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: var(--scrollbar-sidebar-track);
+            border-radius: 999px;
+            margin: 6px 0;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-sidebar-thumb);
+            border-radius: 999px;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: var(--scrollbar-sidebar-thumb-hover);
         }
         
         .sidebar-nav ul {
@@ -153,6 +259,60 @@
             border-left: 3px solid #a3a3a3;
         }
 
+        /* Submenu DEV (somente conta desenvolvedor) */
+        .sidebar-dev-wrap {
+            list-style: none;
+            margin: 0 0 2px 0;
+        }
+        .sidebar-dev-details {
+            margin: 0;
+            padding: 0;
+        }
+        .sidebar-dev-details summary {
+            list-style: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.85);
+            border-left: 3px solid transparent;
+            user-select: none;
+        }
+        .sidebar-dev-details summary::-webkit-details-marker {
+            display: none;
+        }
+        .sidebar-dev-details summary i {
+            margin-right: 10px;
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+        .sidebar-dev-details summary:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+        .sidebar-dev-details[open] summary {
+            background-color: rgba(255, 255, 255, 0.06);
+            border-left-color: #a78bfa;
+        }
+        .sidebar-dev-submenu {
+            list-style: none;
+            margin: 0;
+            padding: 0 0 6px 0;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        .sidebar-dev-submenu li {
+            margin: 0;
+        }
+        .sidebar-dev-submenu a {
+            padding-left: 36px !important;
+            font-size: 0.92rem;
+            border-left-width: 3px !important;
+        }
+        .sidebar-dev-submenu a.active {
+            border-left-color: #a78bfa !important;
+        }
+
         /* Layout principal */
         .app-container {
             display: flex;
@@ -183,7 +343,7 @@
             align-items: center;
             justify-content: center;
             gap: 12px;
-            background-color: #0a0a0a;
+            background-color: var(--primary);
             border-bottom: 1px solid rgba(255, 255, 255, 0.12);
             user-select: none;
             -webkit-user-select: none;
@@ -1223,7 +1383,7 @@
             <div class="sidebar-brand">
                 <img
                     class="sidebar-brand__mark"
-                    src="/public/logo/jhow-jhow-mark.png"
+                    src="{{ asset('logo/jhow-jhow-mark.png') }}"
                     width="120"
                     height="120"
                     alt="Ícone"
@@ -1232,7 +1392,7 @@
                     decoding="async">
                 <img
                     class="sidebar-brand__wordmark"
-                    src="/public/logo/jhow-jhow-wordmark.png"
+                    src="{{ asset('logo/jhow-jhow-wordmark.png') }}"
                     width="280"
                     height="80"
                     alt="Logo"
@@ -1280,6 +1440,12 @@
                             </a>
                             <div class="dropdown-divider"></div>
                             @endif
+                            @if(Auth::user()->isDev())
+                            <a href="{{ route('dev.index') }}" class="dropdown-item">
+                                <i class="fas fa-code"></i> Painel DEV
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            @endif
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
                                 <button type="submit" class="dropdown-item">
@@ -1294,8 +1460,13 @@
             <!-- Conteúdo da Página -->
             <main class="flex-1 overflow-y-auto pt-2 px-3 pb-4">
                 @if (session('success'))
+                    @php $flashSuccess = session('success'); @endphp
                     <div class="alert alert-success" role="alert">
-                        <p class="mb-0">{{ session('success') }}</p>
+                        @if(is_array($flashSuccess))
+                            <p class="mb-0">{{ $flashSuccess['title'] ?? 'Operação concluída.' }}</p>
+                        @else
+                            <p class="mb-0" style="white-space: pre-wrap;">{{ $flashSuccess }}</p>
+                        @endif
                     </div>
                 @endif
 
@@ -1321,7 +1492,7 @@
             <!-- Footer -->
             <footer class="bg-white p-4 border-t">
                 <div class="text-center text-sm text-gray-500">
-                    Sistema JhowJhow &copy; {{ date('Y') }}. Todos os direitos reservados.
+                    {{ $layoutSiteTitle ?? config('app.name', 'Sistema JhowJhow') }} &copy; {{ date('Y') }}. Todos os direitos reservados.
                 </div>
             </footer>
         </div>

@@ -59,6 +59,49 @@
             </a>
         </li>
         @endif
+
+        @if(Auth::user()->isDev())
+        <li class="sidebar-dev-wrap">
+            <details class="sidebar-dev-details" @if(request()->routeIs('dev.*')) open @endif>
+                <summary class="sidebar-dev-summary">
+                    <i class="fas fa-code"></i>
+                    <span>Configurações</span>
+                </summary>
+                <ul class="sidebar-dev-submenu">
+                    <li>
+                        <a href="{{ route('dev.index') }}" class="{{ request()->routeIs('dev.index') ? 'active' : '' }}">
+                            <i class="fas fa-home"></i><span>Visão geral</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('dev.general') }}" class="{{ request()->routeIs('dev.general') ? 'active' : '' }}">
+                            <i class="fas fa-sliders-h"></i><span>Gerais</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('dev.users') }}" class="{{ request()->routeIs('dev.users') ? 'active' : '' }}">
+                            <i class="fas fa-users-cog"></i><span>Usuários e cargos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('dev.cache') }}" class="{{ request()->routeIs('dev.cache') ? 'active' : '' }}">
+                            <i class="fas fa-bolt"></i><span>Cache e Artisan</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('dev.about') }}" class="{{ request()->routeIs('dev.about') ? 'active' : '' }}">
+                            <i class="fas fa-info-circle"></i><span>Sobre o app</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('dev.migrations') }}" class="{{ request()->routeIs('dev.migrations') ? 'active' : '' }}">
+                            <i class="fas fa-database"></i><span>Status das migrações</span>
+                        </a>
+                    </li>
+                </ul>
+            </details>
+        </li>
+        @endif
         
         <li class="sidebar-divider">
             <a href="{{ route('profile') }}">

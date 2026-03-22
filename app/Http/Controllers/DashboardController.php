@@ -100,6 +100,7 @@ class DashboardController extends Controller
 
         // Usuários online no sistema (ativos nos últimos 5 minutos)
         $usuariosAtivos = User::where('is_online', true)
+            ->where('show_in_online_users', true)
             ->whereNotNull('last_activity')
             ->where('last_activity', '>=', now()->subMinutes(5))
             ->orderBy('last_activity', 'desc')

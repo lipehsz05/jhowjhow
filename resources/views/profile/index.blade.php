@@ -90,6 +90,18 @@
                             <input type="text" class="form-control" id="cargo" value="{{ Auth::user()->nivel_acesso === 'dev' ? 'DEV' : ucfirst(Auth::user()->nivel_acesso) }}" disabled readonly>
                             <div class="form-text">Seu cargo atual no sistema.</div>
                         </div>
+
+                        @if(Auth::user()->isDev())
+                        <div class="mb-3 p-3 rounded border bg-light">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="show_in_online_users" name="show_in_online_users" value="1" {{ old('show_in_online_users', Auth::user()->show_in_online_users ?? true) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="show_in_online_users">
+                                    <strong>Aparecer em “Usuários Online”</strong>
+                                    <span class="d-block text-muted small fw-normal mt-1">Desative para não ser listado no painel do dashboard (você continua logado e o sistema registra atividade normalmente).</span>
+                                </label>
+                            </div>
+                        </div>
+                        @endif
                         
                         <button type="submit" class="btn btn-primary">Atualizar Perfil</button>
                     </form>

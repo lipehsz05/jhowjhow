@@ -20,6 +20,11 @@ class RoleRedirect
         if ($request->routeIs('login') || $request->routeIs('logout')) {
             return $next($request);
         }
+
+        // Favicon: navegadores pedem sem cookie de sessão; não redirecionar para login
+        if ($request->is('favicon.ico')) {
+            return $next($request);
+        }
         
         // Verificar se o usuário está autenticado
         if (!Auth::check()) {
