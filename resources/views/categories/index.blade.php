@@ -37,7 +37,7 @@
             @if ($categorias->isEmpty())
                 <p class="p-4 mb-0 text-muted">Nenhuma categoria cadastrada. Clique em <strong>Nova categoria</strong> para criar.</p>
             @else
-                <div class="table-responsive">
+                <div class="table-responsive table-list-desktop">
                     <table class="table table-striped table-hover mb-0 align-middle">
                         <thead class="table-light">
                             <tr>
@@ -88,6 +88,9 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+                <div class="table-list-mobile px-3 pt-3">
+                    @include('categories.partials.mobile-cards', ['categorias' => $categorias])
                 </div>
                 <div class="card-footer d-flex justify-content-center">
                     {{ $categorias->withQueryString()->links() }}

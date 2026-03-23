@@ -245,6 +245,7 @@
             transform: rotate(360deg);
         }
     }
+
 </style>
 @endsection
 
@@ -310,7 +311,7 @@
                      aria-busy="false">
                     <div class="inventory-loader-ring" role="status" aria-label="Carregando lista de produtos"></div>
                 </div>
-                <div class="table-responsive">
+                <div class="table-responsive table-list-desktop">
                     <table class="table table-bordered table-hover" id="produtosTable">
                         <thead>
                             <tr>
@@ -328,6 +329,9 @@
                             @include('inventory.partials.table-rows', ['produtos' => $produtos])
                         </tbody>
                     </table>
+                </div>
+                <div class="table-list-mobile" id="inventory-mobile-cards">
+                    @include('inventory.partials.mobile-cards', ['produtos' => $produtos])
                 </div>
             </div>
 
@@ -409,6 +413,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Pesquisa e filtro em tempo real (estoque)
 $(document).ready(function() {
     var $tbody = $('#produtos-tbody');
+    var $mobileCards = $('#inventory-mobile-cards');
     var $pagination = $('#inventory-pagination-wrap');
     var $loading = $('#inventory-loading');
     var $hint = $('#inventory-total-hint');
@@ -457,6 +462,9 @@ $(document).ready(function() {
             })
             .then(function (data) {
                 $tbody.html(data.html);
+                if (data.mobile_html !== undefined) {
+                    $mobileCards.html(data.mobile_html);
+                }
                 $pagination.html(data.pagination || '');
                 if (typeof data.total === 'number') {
                     setTotalHint(data.total);

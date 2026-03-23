@@ -14,7 +14,7 @@
     <div class="card mb-4">
         <div class="card-header"><i class="fas fa-users me-1"></i> Todos os usuários</div>
         <div class="card-body p-0">
-            <div class="table-responsive">
+            <div class="table-responsive table-list-desktop">
                 <table class="table table-striped mb-0 align-middle">
                     <thead>
                         <tr>
@@ -61,6 +61,9 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+            <div class="table-list-mobile p-3">
+                @include('dev.partials.users-mobile-cards', ['users' => $users])
             </div>
         </div>
     </div>

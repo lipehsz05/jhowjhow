@@ -1282,6 +1282,93 @@
                 padding-right: 0.75rem !important;
             }
         }
+
+        /* ===== Tabelas: lista em cards no mobile (padrão global) ===== */
+        .table-list-mobile {
+            display: none;
+        }
+        @media (max-width: 991.98px) {
+            .table-list-desktop {
+                display: none !important;
+            }
+            .table-list-mobile {
+                display: block;
+            }
+        }
+        @media (min-width: 992px) {
+            .table-list-mobile {
+                display: none !important;
+            }
+        }
+
+        .mobile-data-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+        .mobile-data-card__top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .mobile-data-card__title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.35;
+            color: #0f172a;
+            word-break: break-word;
+        }
+        .mobile-data-card__meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem 1rem;
+            margin: 0;
+            font-size: 0.875rem;
+        }
+        .mobile-data-card__meta > div {
+            min-width: 0;
+        }
+        .mobile-data-card__meta .mobile-data-card__meta-full {
+            grid-column: 1 / -1;
+        }
+        .mobile-data-card__meta dt {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #64748b;
+            margin: 0 0 2px 0;
+            font-weight: 600;
+        }
+        .mobile-data-card__meta dd {
+            margin: 0;
+            color: #1e293b;
+            word-break: break-word;
+        }
+        .mobile-data-card__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid #f1f5f9;
+        }
+        .mobile-data-card__actions .btn {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        @media (max-width: 420px) {
+            .mobile-data-card__meta {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
     
     <!-- Font Awesome para ícones -->

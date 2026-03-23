@@ -44,7 +44,7 @@
                 </div>
             @endif
             
-            <div class="table-responsive">
+            <div class="table-responsive table-list-desktop">
                 <table class="table table-bordered table-hover" id="historicoTable">
                     <thead>
                         <tr>
@@ -97,6 +97,9 @@
                     </tbody>
                 </table>
             </div>
+            <div class="table-list-mobile">
+                @include('history.partials.mobile-cards', ['vendas' => $vendas ?? []])
+            </div>
             
             <!-- Paginação -->
             <div class="mt-4 d-flex justify-content-center">
@@ -126,12 +129,28 @@
 @section('scripts')
 <script>
     $(document).ready(function() {
-        $('#historicoTable').DataTable({
+        var $t = $('#historicoTable');
+        var opts = {
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/pt-BR.json'
             },
             responsive: true,
-            order: [[1, 'desc']] // Ordenar por data decrescente
+            order: [[2, 'desc']]
+        };
+        function syncHistoricoDt() {
+            if (window.matchMedia('(min-width: 992px)').matches) {
+                if (!$.fn.DataTable.isDataTable($t)) {
+                    $t.DataTable(opts);
+                }
+            } else if ($.fn.DataTable.isDataTable($t)) {
+                $t.DataTable().destroy();
+            }
+        }
+        syncHistoricoDt();
+        var deb;
+        $(window).on('resize', function () {
+            clearTimeout(deb);
+            deb = setTimeout(syncHistoricoDt, 200);
         });
     });
 </script>

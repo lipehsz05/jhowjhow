@@ -30,7 +30,7 @@
                 </div>
             @endif
             
-            <div class="table-responsive">
+            <div class="table-responsive table-list-desktop">
                 <table class="table table-bordered table-hover" id="vendasTable">
                     <thead>
                         <tr>
@@ -49,7 +49,7 @@
                                 <td>{{ $venda->codigo }}</td>
                                 <td>{{ $venda->data->format('d/m/Y H:i') }}</td>
                                 <td>{{ $venda->cliente->nome ?? 'Cliente não registrado' }}</td>
-                                <td>{{ $venda->user->name ?? 'Vendedor não identificado' }}</td>
+                                <td>{{ $venda->usuario->name ?? 'Vendedor não identificado' }}</td>
                                 <td>R$ {{ number_format($venda->valor_total, 2, ',', '.') }}</td>
                                 <td>
                                     @if($venda->status == 'concluida')
@@ -87,6 +87,9 @@
                     </tbody>
                 </table>
             </div>
+            <div class="table-list-mobile">
+                @include('sales.partials.mobile-cards', ['vendas' => $vendas ?? []])
+            </div>
         </div>
     </div>
 </div>
@@ -95,12 +98,28 @@
 @section('scripts')
 <script>
     $(document).ready(function() {
-        $('#vendasTable').DataTable({
+        var $t = $('#vendasTable');
+        var opts = {
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/pt-BR.json'
             },
             responsive: true,
-            order: [[1, 'desc']] // Ordenar por data decrescente
+            order: [[1, 'desc']]
+        };
+        function syncVendasDt() {
+            if (window.matchMedia('(min-width: 992px)').matches) {
+                if (!$.fn.DataTable.isDataTable($t)) {
+                    $t.DataTable(opts);
+                }
+            } else if ($.fn.DataTable.isDataTable($t)) {
+                $t.DataTable().destroy();
+            }
+        }
+        syncVendasDt();
+        var deb;
+        $(window).on('resize', function () {
+            clearTimeout(deb);
+            deb = setTimeout(syncVendasDt, 200);
         });
     });
 </script>

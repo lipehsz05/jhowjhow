@@ -35,6 +35,7 @@ class InventoryController extends Controller
 
         return response()->json([
             'html' => view('inventory.partials.table-rows', compact('produtos'))->render(),
+            'mobile_html' => view('inventory.partials.mobile-cards', compact('produtos'))->render(),
             'pagination' => view('inventory.partials.pagination-inventory', compact('produtos'))->render(),
             'total' => $produtos->total(),
         ]);

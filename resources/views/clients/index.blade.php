@@ -33,7 +33,7 @@
                 </div>
             </form>
 
-            <div class="table-responsive">
+            <div class="table-responsive table-list-desktop">
                 <table class="table table-bordered table-hover align-middle">
                     <thead>
                         <tr>
@@ -85,6 +85,9 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+            <div class="table-list-mobile">
+                @include('clients.partials.mobile-cards', ['clientes' => $clientes])
             </div>
 
             <div class="d-flex justify-content-center mt-3">

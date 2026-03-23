@@ -37,7 +37,7 @@
                 </div>
             @endif
             
-            <div class="table-responsive">
+            <div class="table-responsive table-list-desktop">
                 <table class="table table-bordered table-hover" id="movimentacoesTable">
                     <thead>
                         <tr>
@@ -81,6 +81,9 @@
                     </tbody>
                 </table>
             </div>
+            <div class="table-list-mobile">
+                @include('inventory.movimentacoes.partials.mobile-cards', ['movimentacoes' => $movimentacoes ?? []])
+            </div>
         </div>
     </div>
 </div>
@@ -89,12 +92,28 @@
 @section('scripts')
 <script>
     $(document).ready(function() {
-        $('#movimentacoesTable').DataTable({
+        var $t = $('#movimentacoesTable');
+        var opts = {
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/pt-BR.json'
             },
             responsive: true,
-            order: [[1, 'desc']] // Ordenar por data decrescente
+            order: [[1, 'desc']]
+        };
+        function syncMovDt() {
+            if (window.matchMedia('(min-width: 992px)').matches) {
+                if (!$.fn.DataTable.isDataTable($t)) {
+                    $t.DataTable(opts);
+                }
+            } else if ($.fn.DataTable.isDataTable($t)) {
+                $t.DataTable().destroy();
+            }
+        }
+        syncMovDt();
+        var deb;
+        $(window).on('resize', function () {
+            clearTimeout(deb);
+            deb = setTimeout(syncMovDt, 200);
         });
     });
 </script>

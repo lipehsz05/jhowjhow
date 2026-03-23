@@ -315,13 +315,37 @@
     }
     
     .chart-container {
-        background-color: white;
-        border-radius: var(--card-border-radius);
-        box-shadow: var(--card-shadow);
-        padding: 20px;
+        background: linear-gradient(145deg, #ffffff 0%, #f7f9fc 100%);
+        border: 1px solid #e8edf4;
+        border-radius: 16px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+        padding: 20px 20px 14px;
         margin-bottom: 20px;
         position: relative;
-        height: 400px;
+        height: 430px;
+        overflow: hidden;
+    }
+    .chart-container::before {
+        content: '';
+        position: absolute;
+        top: -80px;
+        right: -80px;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(67, 97, 238, 0.18) 0%, rgba(67, 97, 238, 0) 70%);
+        pointer-events: none;
+    }
+    .chart-title {
+        font-size: 0.98rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 10px;
+        letter-spacing: 0.02em;
+    }
+    .chart-canvas-wrap {
+        position: relative;
+        height: calc(100% - 34px);
     }
     
     .chart-container.full-width {
@@ -347,8 +371,13 @@
         }
         
         .chart-container {
-            padding: 15px;
+            padding: 14px 14px 10px;
             margin-bottom: 15px;
+            border-radius: 14px;
+            height: 360px;
+        }
+        .chart-title {
+            font-size: 0.92rem;
         }
         
         .dashboard-stats {
@@ -713,8 +742,13 @@
         <!-- Charts -->
         <div class="charts-container" style="margin-bottom: 30px;">
             <!-- Gráfico principal com largura controlada -->
-            <div class="chart-container" style="position: relative; height: 400px !important; max-width: 800px; width: 95%; margin: 0 auto; border-radius: 12px; background-color: #fff; padding: 15px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); margin-bottom: 20px;">
-                <canvas id="salesChart" height="370" style="max-height: 370px;"></canvas>
+            <div class="chart-container" style="max-width: 980px; width: 100%; margin: 0 auto 20px;">
+                <div class="chart-title">
+                    <i class="fas fa-chart-column me-2"></i>Resumo financeiro
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="salesChart"></canvas>
+                </div>
             </div>
         </div>
         
@@ -724,24 +758,29 @@
             <div class="dashboard-card" id="top-products">
                 <h3>Produtos Mais Vendidos</h3>
                 @if (isset($produtosMaisVendidos) && count($produtosMaisVendidos) > 0)
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Produto</th>
-                                <th>Quantidade</th>
-                                <th>Total (R$)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($produtosMaisVendidos as $produto)
+                    <div class="table-list-desktop">
+                        <table class="data-table">
+                            <thead>
                                 <tr>
-                                    <td>{{ $produto->nome }}</td>
-                                    <td>{{ $produto->quantidade_vendida }}</td>
-                                    <td>R$ {{ number_format($produto->total_vendido, 2, ',', '.') }}</td>
+                                    <th>Produto</th>
+                                    <th>Quantidade</th>
+                                    <th>Total (R$)</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach ($produtosMaisVendidos as $produto)
+                                    <tr>
+                                        <td>{{ $produto->nome }}</td>
+                                        <td>{{ $produto->quantidade_vendida }}</td>
+                                        <td>R$ {{ number_format($produto->total_vendido, 2, ',', '.') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-list-mobile">
+                        @include('dashboard.partials.mobile-top-products', ['produtosMaisVendidos' => $produtosMaisVendidos])
+                    </div>
                 @else
                     <p>Nenhum produto vendido no período</p>
                 @endif
@@ -751,24 +790,29 @@
             <div class="dashboard-card" id="category-sales">
                 <h3>Vendas por Categoria</h3>
                 @if (isset($vendasPorCategoria) && count($vendasPorCategoria) > 0)
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Categoria</th>
-                                <th>Qtd. Produtos</th>
-                                <th>Total (R$)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($vendasPorCategoria as $categoria)
+                    <div class="table-list-desktop">
+                        <table class="data-table">
+                            <thead>
                                 <tr>
-                                    <td>{{ $categoria->nome }}</td>
-                                    <td>{{ $categoria->quantidade_vendida }}</td>
-                                    <td>R$ {{ number_format($categoria->total_vendido, 2, ',', '.') }}</td>
+                                    <th>Categoria</th>
+                                    <th>Qtd. Produtos</th>
+                                    <th>Total (R$)</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach ($vendasPorCategoria as $categoria)
+                                    <tr>
+                                        <td>{{ $categoria->nome }}</td>
+                                        <td>{{ $categoria->quantidade_vendida }}</td>
+                                        <td>R$ {{ number_format($categoria->total_vendido, 2, ',', '.') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-list-mobile">
+                        @include('dashboard.partials.mobile-category-sales', ['vendasPorCategoria' => $vendasPorCategoria])
+                    </div>
                 @else
                     <p>Nenhuma venda por categoria no período</p>
                 @endif
@@ -1011,89 +1055,9 @@
             type: 'bar',
             data: {
                 labels: chartData.labels,
-                datasets: [
-                    {
-                        label: 'Valor Bruto',
-                        data: chartData.brutos,
-                        backgroundColor: 'rgba(67, 97, 238, 0.8)',
-                        borderColor: '#4361ee',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Valor Líquido',
-                        data: chartData.liquidos,
-                        backgroundColor: 'rgba(46, 204, 113, 0.8)',
-                        borderColor: '#2ecc71',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Vendas Provisórias',
-                        data: chartData.provisorios,
-                        backgroundColor: 'rgba(241, 196, 15, 0.8)', // Amarelo
-                        borderColor: '#f1c40f',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Despesas',
-                        data: chartData.despesas,
-                        backgroundColor: 'rgba(231, 76, 60, 0.8)',
-                        borderColor: '#e74c3c',
-                        borderWidth: 1
-                    }
-                ]
+                datasets: buildChartDatasets(chartData)
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                title: {
-                    display: true,
-                    text: 'Resumo financeiro',
-                    fontSize: 18
-                },
-                tooltips: {
-                    mode: 'index',
-                    intersect: false,
-                    callbacks: {
-                        label: function(tooltipItem, data) {
-                            let label = data.datasets[tooltipItem.datasetIndex].label || '';
-                            if (label) label += ': ';
-                            label += new Intl.NumberFormat('pt-BR', {
-                                style: 'currency',
-                                currency: 'BRL'
-                            }).format(tooltipItem.yLabel);
-                            return label;
-                        }
-                    }
-                },
-                scales: {
-                    xAxes: [{
-                        gridLines: {
-                            display: false
-                        },
-                        ticks: {
-                            maxRotation: 45,
-                            minRotation: 45,
-                            autoSkip: true,
-                            maxTicksLimit: 15
-                        }
-                    }],
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true,
-                            callback: function(value) {
-                                return new Intl.NumberFormat('pt-BR', {
-                                    style: 'currency',
-                                    currency: 'BRL',
-                                    maximumFractionDigits: 0
-                                }).format(value);
-                            }
-                        },
-                        gridLines: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    }]
-                }
-            }
+            options: buildChartOptions('Resumo financeiro')
         });
         
         // Usar as variáveis já declaradas no início do script
@@ -1105,6 +1069,172 @@
                 style: 'currency',
                 currency: 'BRL'
             }).format(valor);
+        }
+
+        function getTooltipTitle(label) {
+            if (currentPeriod === 'daily' || currentPeriod === 'yesterday') {
+                return 'Hora: ' + label;
+            }
+            if (currentPeriod === 'weekly' || currentPeriod === 'monthly' || currentPeriod === 'custom') {
+                const date = new Date(label + (label.length <= 10 ? 'T12:00:00' : ''));
+                if (!isNaN(date.getTime())) {
+                    return 'Data: ' + date.toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+                }
+            }
+            return 'Período: ' + label;
+        }
+
+        function buildChartDatasets(chartData) {
+            return [
+                {
+                    label: 'Valor Bruto',
+                    data: chartData.brutos,
+                    backgroundColor: 'rgba(67, 97, 238, 0.78)',
+                    borderColor: '#4361ee',
+                    borderWidth: 1.2,
+                    borderSkipped: false,
+                    categoryPercentage: 0.72,
+                    barPercentage: 0.84
+                },
+                {
+                    label: 'Valor Líquido',
+                    data: chartData.liquidos,
+                    backgroundColor: 'rgba(16, 185, 129, 0.78)',
+                    borderColor: '#10b981',
+                    borderWidth: 1.2,
+                    borderSkipped: false,
+                    categoryPercentage: 0.72,
+                    barPercentage: 0.84
+                },
+                {
+                    label: 'Vendas Provisórias',
+                    data: chartData.provisorios,
+                    backgroundColor: 'rgba(245, 158, 11, 0.78)',
+                    borderColor: '#f59e0b',
+                    borderWidth: 1.2,
+                    borderSkipped: false,
+                    categoryPercentage: 0.72,
+                    barPercentage: 0.84
+                },
+                {
+                    label: 'Despesas',
+                    data: chartData.despesas,
+                    backgroundColor: 'rgba(239, 68, 68, 0.78)',
+                    borderColor: '#ef4444',
+                    borderWidth: 1.2,
+                    borderSkipped: false,
+                    categoryPercentage: 0.72,
+                    barPercentage: 0.84
+                }
+            ];
+        }
+
+        function buildChartOptions(chartTitle) {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                hover: {
+                    mode: 'index',
+                    intersect: true
+                },
+                events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
+                animation: {
+                    duration: 550,
+                    easing: 'easeOutQuart'
+                },
+                title: {
+                    display: true,
+                    text: chartTitle,
+                    fontSize: 16,
+                    fontStyle: '600',
+                    padding: 14
+                },
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        boxWidth: 10,
+                        padding: 18,
+                        fontColor: '#334155'
+                    }
+                },
+                tooltips: {
+                    enabled: true,
+                    mode: 'index',
+                    intersect: true,
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    titleFontSize: 13,
+                    bodyFontSize: 12,
+                    xPadding: 12,
+                    yPadding: 10,
+                    cornerRadius: 10,
+                    displayColors: true,
+                    callbacks: {
+                        title: function(tooltipItems, data) {
+                            const item = tooltipItems[0];
+                            return getTooltipTitle(data.labels[item.index]);
+                        },
+                        label: function(tooltipItem, data) {
+                            const dataset = data.datasets[tooltipItem.datasetIndex];
+                            const value = dataset.data[tooltipItem.index] || 0;
+                            const formattedValue = value.toLocaleString('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                                minimumFractionDigits: 2
+                            });
+                            return dataset.label + ': ' + formattedValue;
+                        },
+                        footer: function(tooltipItems, data) {
+                            let total = 0;
+                            tooltipItems.forEach(function(tooltipItem) {
+                                const datasetLabel = data.datasets[tooltipItem.datasetIndex].label;
+                                if (datasetLabel === 'Valor Bruto' || datasetLabel === 'Vendas Provisórias') {
+                                    total += data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index] || 0;
+                                }
+                            });
+                            return 'Total de Vendas: ' + total.toLocaleString('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                                minimumFractionDigits: 2
+                            });
+                        }
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        gridLines: {
+                            display: false
+                        },
+                        ticks: {
+                            maxRotation: 0,
+                            minRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: 14,
+                            fontColor: '#64748b'
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            padding: 10,
+                            fontColor: '#64748b',
+                            callback: function(value) {
+                                return 'R$ ' + value.toLocaleString('pt-BR');
+                            }
+                        },
+                        gridLines: {
+                            color: 'rgba(148, 163, 184, 0.22)',
+                            borderDash: [4, 4],
+                            drawBorder: false
+                        }
+                    }]
+                }
+            };
         }
         
         // Função para formatar porcentagem
@@ -1512,139 +1642,9 @@
                 type: 'bar',
                 data: {
                     labels: chartData.labels,
-                    datasets: [
-                        {
-                            label: 'Valor Bruto',
-                            data: chartData.brutos,
-                            backgroundColor: 'rgba(67, 97, 238, 0.8)',
-                            borderColor: '#4361ee',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Valor Líquido',
-                            data: chartData.liquidos,
-                            backgroundColor: 'rgba(46, 204, 113, 0.8)',
-                            borderColor: '#2ecc71',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Vendas Provisórias',
-                            data: chartData.provisorios,
-                            backgroundColor: 'rgba(241, 196, 15, 0.8)', // Amarelo
-                            borderColor: '#f1c40f',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Despesas',
-                            data: chartData.despesas,
-                            backgroundColor: 'rgba(231, 76, 60, 0.8)',
-                            borderColor: '#e74c3c',
-                            borderWidth: 1
-                        }
-                    ]
+                    datasets: buildChartDatasets(chartData)
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    // Permitir evento de hover para tooltips, mas de forma controlada
-                    hover: { 
-                        mode: 'index',
-                        intersect: true
-                    },
-                    // Permitir eventos para tooltips
-                    events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
-                    animation: {
-                        duration: 400 // Animação moderada
-                    },
-                    title: {
-                        display: true,
-                        text: chartTitle
-                    },
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltips: {
-                        enabled: true,
-                        mode: 'index',
-                        intersect: true,
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        titleFontSize: 14,
-                        bodyFontSize: 13,
-                        callbacks: {
-                            // Título personalizado com formato baseado no período
-                            title: function(tooltipItems, data) {
-                                const item = tooltipItems[0];
-                                const label = data.labels[item.index];
-                                
-                                if (currentPeriod === 'daily' || currentPeriod === 'yesterday') {
-                                    return 'Hora: ' + label;
-                                }
-                                if (currentPeriod === 'weekly' || currentPeriod === 'monthly' || currentPeriod === 'custom') {
-                                    const date = new Date(label + (label.length <= 10 ? 'T12:00:00' : ''));
-                                    if (!isNaN(date.getTime())) {
-                                        return 'Data: ' + date.toLocaleDateString('pt-BR', {
-                                            day: '2-digit',
-                                            month: '2-digit',
-                                            year: 'numeric'
-                                        });
-                                    }
-                                }
-                                return 'Período: ' + label;
-                            },
-                            // Detalhes de cada tipo de valor
-                            label: function(tooltipItem, data) {
-                                const dataset = data.datasets[tooltipItem.datasetIndex];
-                                const value = dataset.data[tooltipItem.index] || 0;
-                                const formattedValue = value.toLocaleString('pt-BR', {
-                                    style: 'currency',
-                                    currency: 'BRL',
-                                    minimumFractionDigits: 2
-                                });
-                                
-                                return dataset.label + ': ' + formattedValue;
-                            },
-                            // Rodapé com total geral
-                            footer: function(tooltipItems, data) {
-                                let total = 0;
-                                tooltipItems.forEach(function(tooltipItem) {
-                                    // Soma apenas os valores brutos e provísorios, não soma despesas
-                                    const datasetLabel = data.datasets[tooltipItem.datasetIndex].label;
-                                    if (datasetLabel === 'Valor Bruto' || datasetLabel === 'Vendas Provisórias') {
-                                        total += data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index] || 0;
-                                    }
-                                });
-                                
-                                return 'Total de Vendas: ' + total.toLocaleString('pt-BR', {
-                                    style: 'currency',
-                                    currency: 'BRL',
-                                    minimumFractionDigits: 2
-                                });
-                            }
-                        }
-                    },
-                    scales: {
-                        xAxes: [{
-                            gridLines: {
-                                display: false
-                            },
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45,
-                                autoSkip: true,
-                                maxTicksLimit: 15
-                            }
-                        }],
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true,
-                                callback: function(value) {
-                                    return 'R$ ' + value.toLocaleString('pt-BR');
-                                }
-                            }
-                        }]
-                    }
-                }
+                options: buildChartOptions(chartTitle)
             });
             
             // Salvando configuração para poder restaurar se necessário

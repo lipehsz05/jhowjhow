@@ -79,7 +79,7 @@
             
             <!-- Itens da Venda -->
             <h6 class="text-muted mb-3">Itens da Venda</h6>
-            <div class="table-responsive">
+            <div class="table-responsive table-list-desktop">
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -102,6 +102,9 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+            <div class="table-list-mobile">
+                @include('sales.partials.mobile-item-cards', ['venda' => $venda])
             </div>
             
             <!-- Resumo Financeiro -->

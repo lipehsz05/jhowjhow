@@ -35,7 +35,7 @@
                     <i class="fas fa-plus me-1"></i> Adicionar Usuário
                 </a>
             </div>
-            <div class="table-responsive">
+            <div class="table-responsive table-list-desktop">
                 <table id="datatablesSimple" class="table table-striped table-bordered">
                     <thead>
                         <tr>
@@ -98,6 +98,9 @@
                     </tbody>
                 </table>
             </div>
+            <div class="table-list-mobile">
+                @include('admin.users.partials.mobile-cards', ['users' => $users, 'currentUser' => $currentUser])
+            </div>
         </div>
     </div>
 </div>
@@ -105,16 +108,33 @@
 
 @section('scripts')
 <script>
-    // Configuração da DataTable
     document.addEventListener('DOMContentLoaded', function () {
-        const datatablesSimple = document.getElementById('datatablesSimple');
-        if (datatablesSimple) {
-            new simpleDatatables.DataTable(datatablesSimple, {
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-                }
-            });
+        var el = document.getElementById('datatablesSimple');
+        if (!el) return;
+        var dt = null;
+        function isDesktop() {
+            return window.matchMedia('(min-width: 992px)').matches;
         }
+        function syncAdminUsersTable() {
+            if (isDesktop()) {
+                if (!dt) {
+                    dt = new simpleDatatables.DataTable(el, {
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+                        }
+                    });
+                }
+            } else if (dt) {
+                dt.destroy();
+                dt = null;
+            }
+        }
+        syncAdminUsersTable();
+        var t;
+        window.addEventListener('resize', function () {
+            clearTimeout(t);
+            t = setTimeout(syncAdminUsersTable, 200);
+        });
     });
 </script>
 @endsection
