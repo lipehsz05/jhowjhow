@@ -570,13 +570,16 @@
         if (!panel || !select || !titulo || !texto || !badge || !hint) {
             return;
         }
-        const id = select.value;
-        if (!id) {
+        function esconderPainelMarco() {
             panel.classList.remove('is-visible', 'cliente-milestone-wrap--info');
             titulo.textContent = '';
             texto.textContent = '';
             hint.textContent = '';
             badge.style.display = 'none';
+        }
+        const id = select.value;
+        if (!id) {
+            esconderPainelMarco();
             return;
         }
         const base = '{{ url('/api/clientes') }}';
@@ -589,24 +592,20 @@
                 return r.json();
             })
             .then(function (data) {
-                panel.classList.add('is-visible');
-                if (data.eh_marco) {
-                    panel.classList.remove('cliente-milestone-wrap--info');
-                    titulo.textContent = data.titulo || '';
-                    texto.textContent = data.mensagem || '';
-                    badge.textContent = 'Próxima concluída: ' + data.proxima_venda_numero + 'ª venda';
-                    badge.style.display = 'inline-block';
-                    hint.textContent = 'Contagem considera apenas vendas concluídas. Se salvar como provisória, o número só avança ao concluir depois.';
-                } else {
-                    panel.classList.add('cliente-milestone-wrap--info');
-                    titulo.textContent = 'Histórico do cliente';
-                    texto.textContent = data.resumo || '';
-                    badge.style.display = 'none';
-                    hint.textContent = 'Contagem considera apenas vendas concluídas. Se salvar como provisória, o número só avança ao concluir depois.';
+                if (!data.eh_marco) {
+                    esconderPainelMarco();
+                    return;
                 }
+                panel.classList.remove('cliente-milestone-wrap--info');
+                panel.classList.add('is-visible');
+                titulo.textContent = data.titulo || '';
+                texto.textContent = data.mensagem || '';
+                badge.textContent = 'Próxima concluída: ' + data.proxima_venda_numero + 'ª venda';
+                badge.style.display = 'inline-block';
+                hint.textContent = 'Contagem considera apenas vendas concluídas. Se salvar como provisória, o número só avança ao concluir depois.';
             })
             .catch(function () {
-                panel.classList.remove('is-visible', 'cliente-milestone-wrap--info');
+                esconderPainelMarco();
             });
     }
     
