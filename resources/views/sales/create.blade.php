@@ -215,6 +215,12 @@
     #produtos_tabela tr:hover {
         background-color: rgba(0, 123, 255, 0.05);
     }
+
+    /* Modal de novo cliente: não exibir o conteúdo na página até abrir (fallback se CSS do Bootstrap falhar) */
+    #novoClienteModal:not(.show) {
+        display: none !important;
+        pointer-events: none;
+    }
 </style>
 @endsection
 
@@ -415,8 +421,8 @@
     </form>
 </div>
 
-<!-- Modal para Novo Cliente -->
-<div class="modal fade" id="novoClienteModal" tabindex="-1" aria-labelledby="novoClienteModalLabel" aria-modal="true" role="dialog">
+<!-- Modal para Novo Cliente (só visível ao clicar em +) -->
+<div class="modal fade" id="novoClienteModal" tabindex="-1" aria-labelledby="novoClienteModalLabel" aria-hidden="true" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -438,7 +444,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="telefone_cliente" class="form-label">Telefone</label>
-                        <input type="text" class="form-control" id="telefone_cliente" placeholder="(83) 99359-8119" maxlength="15" inputmode="numeric" autocomplete="tel">
+                        <input type="text" class="form-control" id="telefone_cliente" placeholder="(83) 99999-9999" maxlength="15" inputmode="numeric" autocomplete="tel">
                         <div class="invalid-feedback" id="telefone_cliente_error"></div>
                         <small class="form-text text-muted">Formato: (83) 99999-9999</small>
                     </div>
@@ -629,8 +635,10 @@
                             select.value = response.cliente.id;
                             
                             // Fechar o modal
-                            const clienteModal = bootstrap.Modal.getInstance(document.getElementById('clienteModal'));
-                            clienteModal.hide();
+                            const clienteModal = bootstrap.Modal.getInstance(document.getElementById('novoClienteModal'));
+                            if (clienteModal) {
+                                clienteModal.hide();
+                            }
                             
                             // Focar no próximo campo após fechar o modal
                             setTimeout(() => {

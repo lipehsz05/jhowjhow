@@ -37,7 +37,7 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold" for="telefone">Telefone</label>
-                        <input type="text" class="form-control @error('telefone') is-invalid @enderror" id="telefone" name="telefone" value="{{ old('telefone') }}" placeholder="(83) 99359-8119" maxlength="15" inputmode="numeric" autocomplete="tel">
+                        <input type="text" class="form-control @error('telefone') is-invalid @enderror" id="telefone" name="telefone" value="{{ old('telefone') }}" placeholder="(83) 99999-9999" maxlength="15" inputmode="numeric" autocomplete="tel">
                         @error('telefone')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-md-4 mb-3">
