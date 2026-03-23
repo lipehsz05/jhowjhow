@@ -2,15 +2,16 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Routing\Router;
 use App\Http\Middleware\UserActivity;
 use App\Models\SiteSetting;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
-use Illuminate\Pagination\Paginator;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,16 +32,24 @@ class AppServiceProvider extends ServiceProvider
 
         // Definir o timezone para Brasília em toda a aplicação
         date_default_timezone_set('America/Sao_Paulo');
-        
+
         // Configurar o Carbon para usar o mesmo timezone
         Date::setLocale('pt_BR');
-        
-        // Configurar o timezone no MySQL
-        DB::statement("SET time_zone='-03:00'");
-        
+
+        // Timezone da sessão MySQL (falha silenciosa se DB estiver inacessível — veja DB_* no .env)
+        if (config('database.default') === 'mysql' && ! config('database.skip_mysql_timezone')) {
+            try {
+                DB::statement("SET time_zone='-03:00'");
+            } catch (\Throwable $e) {
+                Log::warning('MySQL: não foi possível aplicar time_zone. Verifique DB_HOST, usuário, senha e se o IP está liberado no painel da hospedagem.', [
+                    'message' => $e->getMessage(),
+                ]);
+            }
+        }
+
         $router = $this->app->make(Router::class);
         $router->pushMiddlewareToGroup('auth', UserActivity::class);
-        
+
         // Registrar o middleware de redirecionamento baseado em papel
         $router->pushMiddlewareToGroup('web', \App\Http\Middleware\RoleRedirect::class);
 

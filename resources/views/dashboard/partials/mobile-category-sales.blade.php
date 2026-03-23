@@ -1,7 +1,7 @@
 @foreach ($vendasPorCategoria as $categoria)
     <article class="mobile-data-card">
         <div class="mobile-data-card__top">
-            <h3 class="mobile-data-card__title">{{ $categoria->nome }}</h3>
+            <h3 class="mobile-data-card__title"><span title="{{ $categoria->nome }}">{{ $categoria->nome }}</span></h3>
         </div>
         <dl class="mobile-data-card__meta">
             <div><dt>Qtd. produtos</dt><dd>{{ $categoria->quantidade_vendida }}</dd></div>

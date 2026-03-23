@@ -210,10 +210,32 @@
     .client-history-section h3 {
         font-size: 18px;
         font-weight: 600;
-        margin-bottom: 15px;
+        margin-bottom: 8px;
         color: var(--dark);
         border-bottom: 1px solid #e9ecef;
         padding-bottom: 10px;
+    }
+
+    .online-users-summary {
+        font-size: 13px;
+        color: #6c757d;
+        margin: 0 0 14px 0;
+        line-height: 1.45;
+    }
+    .online-users-summary strong {
+        color: #343a40;
+        font-weight: 700;
+    }
+    .online-users-summary-sep {
+        margin: 0 0.2rem;
+        font-weight: 400;
+        color: #868e96;
+    }
+
+    .dashboard-details .data-table abbr[title] {
+        cursor: default;
+        text-decoration: none;
+        border-bottom: none;
     }
     
     .client-list {
@@ -484,6 +506,75 @@
     .data-table tr:hover td {
         background-color: #f8f9fa;
     }
+
+    /* Tabelas nos cards (Produtos / Categoria): cabeçalhos curtos + colunas fixas, sem scroll */
+    .dashboard-details .dashboard-card {
+        min-width: 0;
+    }
+    .dashboard-details .table-list-desktop {
+        max-width: 100%;
+    }
+    .dashboard-details .data-table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .dashboard-details .data-table th,
+    .dashboard-details .data-table td {
+        vertical-align: middle;
+        box-sizing: border-box;
+    }
+    .dashboard-details .data-table th:first-child,
+    .dashboard-details .data-table td:first-child {
+        width: 46%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 10px;
+    }
+    .dashboard-details .data-table th:nth-child(2),
+    .dashboard-details .data-table td:nth-child(2) {
+        width: 22%;
+        white-space: nowrap;
+        text-align: center;
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+    .dashboard-details .data-table th:nth-child(3),
+    .dashboard-details .data-table td:nth-child(3) {
+        width: 32%;
+        white-space: nowrap;
+        text-align: right;
+        padding-left: 8px;
+    }
+    .dashboard-details .data-table thead th {
+        font-size: 12px;
+        line-height: 1.35;
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+    }
+    @media (max-width: 480px) {
+        .dashboard-details .data-table thead th {
+            font-size: 11px;
+        }
+    }
+
+    /* Tooltip nativo: nome completo no hover (span interno recebe o evento) */
+    .dashboard-details .dashboard-nome-completo {
+        display: block;
+        max-width: 100%;
+    }
+
+    /* Cards mobile: nome em uma linha só (dashboard) */
+    #top-products .mobile-data-card__title,
+    #category-sales .mobile-data-card__title,
+    #top-clients .mobile-data-card__title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
     
     /* Estado de carregamento */
     .loading {
@@ -626,6 +717,11 @@
                     <i class="fas fa-users text-primary"></i> 
                     Usuários Online
                 </h3>
+                <p class="online-users-summary">
+                    <strong>{{ $totalUsuariosOnline ?? 0 }}</strong> online
+                    <span class="online-users-summary-sep">de</span>
+                    <strong>{{ $totalUsuarios ?? 0 }}</strong> usuários no sistema
+                </p>
                 <ul class="client-list">
                     @forelse ($usuariosAtivos ?? [] as $usuario)
                         <li class="client-item">
@@ -749,6 +845,10 @@
                 <div class="chart-canvas-wrap">
                     <canvas id="salesChart"></canvas>
                 </div>
+                <p class="text-center small text-muted mb-0 mt-2" style="font-size: 0.8rem;">
+                    Passe o mouse sobre o gráfico para ver os valores em R$ por série. <strong>Rolagem do mouse</strong> no gráfico para zoom horizontal; <strong>arrastar</strong> para mover a área visível.
+                    <button type="button" class="btn btn-link btn-sm p-0 align-baseline ms-1" id="salesChart-reset-zoom" style="font-size: inherit;">Resetar zoom</button>
+                </p>
             </div>
         </div>
         
@@ -762,15 +862,17 @@
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Produto</th>
-                                    <th>Quantidade</th>
-                                    <th>Total (R$)</th>
+                                    <th scope="col">Produto</th>
+                                    <th scope="col"><abbr title="Quantidade">Qtd.</abbr></th>
+                                    <th scope="col"><abbr title="Valor total em reais">Total</abbr></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($produtosMaisVendidos as $produto)
                                     <tr>
-                                        <td>{{ $produto->nome }}</td>
+                                        <td>
+                                            <span class="dashboard-nome-completo" title="{{ $produto->nome }}">{{ \Illuminate\Support\Str::limit($produto->nome, 12, '...') }}</span>
+                                        </td>
                                         <td>{{ $produto->quantidade_vendida }}</td>
                                         <td>R$ {{ number_format($produto->total_vendido, 2, ',', '.') }}</td>
                                     </tr>
@@ -794,15 +896,17 @@
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Categoria</th>
-                                    <th>Qtd. Produtos</th>
-                                    <th>Total (R$)</th>
+                                    <th scope="col">Categoria</th>
+                                    <th scope="col"><abbr title="Quantidade de produtos vendidos">Qtd.</abbr></th>
+                                    <th scope="col"><abbr title="Valor total em reais">Total</abbr></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($vendasPorCategoria as $categoria)
                                     <tr>
-                                        <td>{{ $categoria->nome }}</td>
+                                        <td>
+                                            <span class="dashboard-nome-completo" title="{{ $categoria->nome }}">{{ $categoria->nome }}</span>
+                                        </td>
                                         <td>{{ $categoria->quantidade_vendida }}</td>
                                         <td>R$ {{ number_format($categoria->total_vendido, 2, ',', '.') }}</td>
                                     </tr>
@@ -818,12 +922,37 @@
                 @endif
             </div>
             
-            <div class="dashboard-card">
-                <h3 class="card-title">Usuários Ativos</h3>
-                <div class="card-content">
-                    <p class="value">{{ isset($totalUsuarios) ? $totalUsuarios : 0 }}</p>
-                    <p class="trend neutral">Total de usuários no sistema</p>
-                </div>
+            <div class="dashboard-card" id="top-clients">
+                <h3>Clientes que mais compraram</h3>
+                @if (isset($clientesMaisCompraram) && count($clientesMaisCompraram) > 0)
+                    <div class="table-list-desktop">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Cliente</th>
+                                    <th scope="col"><abbr title="Quantidade de compras">Compras</abbr></th>
+                                    <th scope="col"><abbr title="Valor total em reais">Total</abbr></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($clientesMaisCompraram as $cli)
+                                    <tr>
+                                        <td>
+                                            <span class="dashboard-nome-completo" title="{{ $cli->nome }}">{{ \Illuminate\Support\Str::limit($cli->nome, 12, '...') }}</span>
+                                        </td>
+                                        <td>{{ $cli->compras }}</td>
+                                        <td>R$ {{ number_format((float) $cli->total, 2, ',', '.') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-list-mobile">
+                        @include('dashboard.partials.mobile-top-clients', ['clientesMaisCompraram' => $clientesMaisCompraram])
+                    </div>
+                @else
+                    <p>Nenhum cliente com compras no período</p>
+                @endif
             </div>
         </div>
     </div>
@@ -923,15 +1052,15 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- Chart.js - versão estável conhecida por funcionar bem -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.7/dist/chartjs-plugin-zoom.min.js"></script>
 <script>
     // Função executada quando a página estiver carregada
     document.addEventListener('DOMContentLoaded', function() {
         // Variáveis globais e de controle - declaradas uma única vez
         let chartInstance = null;       // Instância do gráfico
         let isUpdatingDashboard = false; // Evita requisições simultâneas
-        let mouseOverChart = false;     // Controla quando o mouse está sobre o gráfico
         let updatingFromUserAction = false; // Se a atualização vem de um clique do usuário
-        let chartInitialized = false;   // Se o gráfico já foi inicializado
         let lastChartConfig = null;     // Guarda a última configuração do gráfico
         let valoresVisiveis = localStorage.getItem('dashboardValuesVisible') !== 'false';
         
@@ -1037,9 +1166,6 @@
             };
         }
         
-        // Flag para evitar recriação desnecessária do gráfico
-        window.chartInitialized = false;
-        
         // Garantir que os arrays de dados existam
         chartData.labels = chartData.labels || ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
         chartData.brutos = chartData.brutos || [1000, 1500, 1200, 1800, 2000, 2200];
@@ -1047,18 +1173,7 @@
         chartData.despesas = chartData.despesas || [800, 900, 850, 950, 1100, 1200];
         chartData.provisorios = chartData.provisorios || [300, 400, 450, 500, 600, 700];
         
-        // Obter o elemento canvas do gráfico
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        
-        // Criar o gráfico
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: chartData.labels,
-                datasets: buildChartDatasets(chartData)
-            },
-            options: buildChartOptions('Resumo financeiro')
-        });
+        // Gráfico criado uma única vez em createChart() (evita duplicar instância no canvas)
         
         // Usar as variáveis já declaradas no início do script
         // Não redeclarar aqui
@@ -1154,9 +1269,21 @@
                 maintainAspectRatio: false,
                 hover: {
                     mode: 'index',
-                    intersect: true
+                    intersect: false
                 },
-                events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
+                events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove', 'wheel'],
+                pan: {
+                    enabled: true,
+                    mode: 'x',
+                    speed: 12,
+                    threshold: 8
+                },
+                zoom: {
+                    enabled: true,
+                    mode: 'x',
+                    sensitivity: 3,
+                    speed: 0.1
+                },
                 animation: {
                     duration: 550,
                     easing: 'easeOutQuart'
@@ -1181,7 +1308,7 @@
                 tooltips: {
                     enabled: true,
                     mode: 'index',
-                    intersect: true,
+                    intersect: false,
                     backgroundColor: 'rgba(15, 23, 42, 0.95)',
                     titleFontSize: 13,
                     bodyFontSize: 12,
@@ -1271,12 +1398,6 @@
             periodo = periodo || localStorage.getItem('dashboardPeriod') || 'daily';
             // Se já estiver atualizando, não faz nada
             if (isUpdatingDashboard) return;
-            
-            // Se o mouse estiver sobre o gráfico e não for uma ação do usuário, não atualiza
-            if (mouseOverChart && !updatingFromUserAction) {
-                console.log('Mouse sobre gráfico, evitando atualização automática');
-                return;
-            }
             
             // Marcar que está atualizando
             isUpdatingDashboard = true;
@@ -1460,127 +1581,12 @@
                 
                 // Enviar período ao backend após montar a UI
                 console.log('Inicializando dashboard com período:', currentPeriod);
-                setTimeout(() => {
-                    // SOLUÇÃO DEFINITIVA: Sobreescrever os métodos do Chart.js que causam o problema
-                    // 1. Desabilitar todos os eventos hover do Chart.js
-                    Chart.defaults.global.hover.mode = null;
-                    Chart.defaults.global.hover.intersect = false;
-                    Chart.defaults.global.hover.animationDuration = 0;
-                    
-                    // 2. Modificar o construtor de Chart para permitir tooltips mas evitar mudanças de período
-                    const originalChartConstructor = Chart;
-                    Chart = function(context, config) {
-                        // Forçar configurações específicas para tooltips sem mudança de período
-                        if (config) {
-                            // Configurar opções
-                            config.options = config.options || {};
-                            
-                            // Permitir apenas eventos de tooltip
-                            config.options.events = ['mousemove', 'mouseout']; // Apenas eventos necessários para tooltips
-                            
-                            // Configurar tooltips
-                            config.options.tooltips = config.options.tooltips || {};
-                            config.options.tooltips.enabled = true;
-                            config.options.tooltips.mode = 'index';
-                            config.options.tooltips.intersect = false;
-                            config.options.tooltips.position = 'nearest';
-                            
-                            // Configurar hover para tooltips
-                            config.options.hover = {
-                                mode: 'index',
-                                intersect: false,
-                                animationDuration: 0
-                            };
-                            
-                            // Configurar tooltips detalhadas
-                            if (!config.options.tooltips.callbacks) {
-                                config.options.tooltips.callbacks = {
-                                    label: function(tooltipItem, data) {
-                                        let label = data.datasets[tooltipItem.datasetIndex].label || '';
-                                        let value = tooltipItem.yLabel;
-                                        if (label) {
-                                            label += ': ' + new Intl.NumberFormat('pt-BR', {
-                                                style: 'currency',
-                                                currency: 'BRL'
-                                            }).format(value);
-                                        }
-                                        return label;
-                                    },
-                                    title: function(tooltipItems, data) {
-                                        // Personalizar o título baseado no período
-                                        const period = localStorage.getItem('dashboardPeriod') || 'daily';
-                                        const title = tooltipItems[0].xLabel;
-                                        
-                                        if (period === 'daily' || period === 'yesterday') {
-                                            return 'Hora: ' + title;
-                                        } else if (period === 'weekly' || period === 'monthly' || period === 'custom') {
-                                            return 'Data: ' + title;
-                                        }
-                                        return title;
-                                    }
-                                };
-                            }
-                        }
-                        
-                        // Chamar o construtor original
-                        return new originalChartConstructor(context, config);
-                    };
-                    
-                    // 3. Copiar todas as propriedades e métodos do construtor original
-                    for (let prop in originalChartConstructor) {
-                        if (originalChartConstructor.hasOwnProperty(prop)) {
-                            Chart[prop] = originalChartConstructor[prop];
-                        }
-                    }
-                    
-                    // 4. Adicionar proteção ao canvas para impedir qualquer evento do mouse
-                    const chartCanvas = document.getElementById('salesChart');
-                    if (chartCanvas) {
-                        // Bloquear todos os eventos do mouse no canvas
-                        const blockEvents = function(e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            return false;
-                        };
-                        
-                        // Eventos do mouse que queremos bloquear
-                        const mouseEvents = ['mousemove', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout', 'click'];
-                        
-                        // Adicionar bloqueadores para cada tipo de evento
-                        mouseEvents.forEach(eventType => {
-                            chartCanvas.addEventListener(eventType, blockEvents, true);
-                        });
-                    }
-                    
-                    // 5. Renderizar o gráfico com o período correto
-                    updatingFromUserAction = true;
-                    if (currentPeriod === 'custom' && customStartDate && customEndDate) {
-                        atualizarDashboard(currentPeriod, customStartDate, customEndDate);
-                    } else {
-                        atualizarDashboard(currentPeriod);
-                    }
-                    
-                    // 6. Adicionar um verificador de segurança para garantir que o período não mude
-                    const safetyInterval = setInterval(() => {
-                        const activeBtn = document.querySelector('.period-btn.active');
-                        if (activeBtn && activeBtn.dataset.period !== currentPeriod) {
-                            console.log('Tentativa de mudança de período detectada e bloqueada');
-                            const correctBtn = document.getElementById('period-' + currentPeriod);
-                            if (correctBtn) correctBtn.click();
-                        }
-                    }, 100); // Verificar 10x por segundo
-                    
-                    // Aplicar proteção adicional para garantir que o gráfico não mude
-                    setInterval(() => {
-                        // Se o período atual não corresponder ao botão ativo, restaurar
-                        const activeButton = document.querySelector('.period-btn.active');
-                        if (activeButton && activeButton.dataset.period !== currentPeriod) {
-                            console.log('Corrigindo período para:', currentPeriod);
-                            // Restaurar o período correto
-                            document.getElementById('period-' + currentPeriod)?.click();
-                        }
-                    }, 500); // Verificar a cada 500ms
-                }, 100);
+                updatingFromUserAction = true;
+                if (currentPeriod === 'custom' && customStartDate && customEndDate) {
+                    atualizarDashboard(currentPeriod, customStartDate, customEndDate);
+                } else {
+                    atualizarDashboard(currentPeriod);
+                }
             } else {
                 const dailyBtn = document.getElementById('period-daily');
                 if (dailyBtn) {
@@ -1593,28 +1599,14 @@
         
         // Variáveis de controle para gráfico
         let chartLastUpdated = new Date().getTime();
-        // Variáveis de controle mouseOverChart e updatingFromUserAction já declaradas no início do script
-        
-        // Usamos a variável lastChartConfig já declarada no início do script
         
         // Função para criar o gráfico
         function createChart(chartData, forceUpdate = false) {
-            // PROTEÇÃO DEFINITIVA: Detectar e bloquear tentativas de mudança não autorizadas
-            const storedPeriod = localStorage.getItem('dashboardPeriod');
-            
-            // Evitar qualquer atualização quando o mouse estiver sobre o gráfico, a menos que seja uma ação do usuário
-            if (mouseOverChart && !updatingFromUserAction) {
-                console.log('Mouse sobre o gráfico, evitando atualização');
-                return false;
-            }
-            
             // Se já existir um gráfico e não for uma atualização forçada, evitar recriação
             if (!forceUpdate && chartInstance) {
-                console.log('Evitando atualização desnecessária do gráfico');
                 return false;
             }
             
-            // Atualizar timestamp
             chartLastUpdated = new Date().getTime();
             
             // Garantir que os arrays de dados existam
@@ -1644,21 +1636,13 @@
                     break;
             }
             
-            // Só destruir e recriar o gráfico se for uma ação deliberada (clique em botão) ou forçada
-            if (!forceUpdate && chartInstance) {
-                // NUNCA atualizar o gráfico automaticamente durante interacão do mouse
-                // Ou se não for uma ação explícita do usuário
-                if (!updatingFromUserAction) {
-                    console.log('Bloqueando atualização não solicitada do gráfico');
-                    return;
-                }
+            if (chartInstance) {
                 chartInstance.destroy();
+                chartInstance = null;
             }
             
-            // Obter o elemento canvas do gráfico
             const ctx = document.getElementById('salesChart').getContext('2d');
             
-            // Criar o gráfico
             chartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1668,51 +1652,21 @@
                 options: buildChartOptions(chartTitle)
             });
             
-            // Salvando configuração para poder restaurar se necessário
             lastChartConfig = chartData;
-            
-            // Desabilita eventos de hover para evitar atualizações desnecessárias
-            if (chartInstance.options) {
-                chartInstance.options.hover = { mode: null };
-            }
             
             return chartInstance;
         }
         
         // Criar o gráfico inicial com os dados do backend
         createChart(chartData, true);
-        
-        // Implementar proteção contra mudança de período mas permitir tooltips
-        const salesChartElem = document.getElementById('salesChart');
-        
-        if (salesChartElem) {
-            // Guardar o período antes e depois de interagir com o gráfico
-            salesChartElem.addEventListener('mouseenter', function() {
-                // Marcar que estamos sobre o gráfico
-                mouseOverChart = true;
-                
-                // Criar uma cópia das configurações para recuperar se necessário
-                if (chartInstance && chartInstance.data) {
-                    // Manter um registro do período para verificar se muda
-                    console.log('Mouse entrou no gráfico - salvando estado atual');
+
+        const resetZoomBtn = document.getElementById('salesChart-reset-zoom');
+        if (resetZoomBtn) {
+            resetZoomBtn.addEventListener('click', function () {
+                if (chartInstance && typeof chartInstance.resetZoom === 'function') {
+                    chartInstance.resetZoom();
                 }
             });
-            
-            salesChartElem.addEventListener('mouseleave', function() {
-                // Marcar que saiu do gráfico
-                mouseOverChart = false;
-                console.log('Mouse saiu do gráfico');
-            });
-            
-            // Adicionar proteção extra para garantir que o gráfico permaneça no período selecionado
-            setInterval(function() {
-                // Verificar se o período atual está consistente com o botão ativo
-                const activePeriodBtn = document.querySelector('.period-btn.active');
-                if (activePeriodBtn && activePeriodBtn.dataset.period !== currentPeriod) {
-                    console.log('Inconsistência detectada: período atual não corresponde ao botão ativo');
-                    document.getElementById('period-' + currentPeriod)?.click();
-                }
-            }, 300);
         }
     });
 </script>

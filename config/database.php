@@ -171,4 +171,9 @@ return [
 
     ],
 
+    /*
+    | Não executar SET time_zone ao conectar (útil se DB estiver indisponível no boot).
+    */
+    'skip_mysql_timezone' => (bool) env('DB_SKIP_TIMEZONE', false),
+
 ];

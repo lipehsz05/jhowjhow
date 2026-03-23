@@ -28,8 +28,18 @@ class ClientController extends Controller
             });
         }
 
+        // Quem mais compra (valor total em vendas concluídas) no topo; empate por nome
         $clientes = $query
             ->withCount('vendas')
+            ->withSum([
+                'vendas as total_gasto_concluidas' => fn ($q) => $q->where('status', 'concluida'),
+            ], 'valor_total')
+            ->orderByDesc(
+                Venda::query()
+                    ->selectRaw('COALESCE(SUM(valor_total), 0)')
+                    ->whereColumn('cliente_id', 'clientes.id')
+                    ->where('status', 'concluida')
+            )
             ->orderBy('nome')
             ->paginate(15)
             ->withQueryString();

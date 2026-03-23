@@ -7,6 +7,7 @@
             <div><dt>Telefone</dt><dd>{{ \App\Support\BrFormat::telefoneDisplay($c->telefone) ?: '—' }}</dd></div>
             <div><dt>E-mail</dt><dd>{{ $c->email ?: '—' }}</dd></div>
             <div><dt>Compras</dt><dd>{{ $c->vendas_count }}</dd></div>
+            <div><dt>Valor</dt><dd>R$ {{ number_format((float) ($c->total_gasto_concluidas ?? 0), 2, ',', '.') }}</dd></div>
         </dl>
         <div class="mobile-data-card__actions">
             <a href="{{ route('clients.show', $c) }}" class="btn btn-info btn-sm" title="Detalhes">

@@ -1,7 +1,7 @@
 @foreach ($produtosMaisVendidos as $produto)
     <article class="mobile-data-card">
         <div class="mobile-data-card__top">
-            <h3 class="mobile-data-card__title">{{ $produto->nome }}</h3>
+            <h3 class="mobile-data-card__title"><span title="{{ $produto->nome }}">{{ \Illuminate\Support\Str::limit($produto->nome, 12, '...') }}</span></h3>
         </div>
         <dl class="mobile-data-card__meta">
             <div><dt>Quantidade</dt><dd>{{ $produto->quantidade_vendida }}</dd></div>

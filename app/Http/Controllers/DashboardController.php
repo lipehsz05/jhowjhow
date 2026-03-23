@@ -99,10 +99,16 @@ class DashboardController extends Controller
             ->sum('valor_total') ?? 0;
 
         // Usuários online no sistema (ativos nos últimos 5 minutos)
-        $usuariosAtivos = User::where('is_online', true)
+        $usuariosOnlineQuery = User::query()
+            ->where('is_online', true)
             ->where('show_in_online_users', true)
             ->whereNotNull('last_activity')
-            ->where('last_activity', '>=', now()->subMinutes(5))
+            ->where('last_activity', '>=', now()->subMinutes(5));
+
+        $totalUsuariosOnline = (clone $usuariosOnlineQuery)->count();
+        $totalUsuarios = User::count();
+
+        $usuariosAtivos = (clone $usuariosOnlineQuery)
             ->orderBy('last_activity', 'desc')
             ->take(5)
             ->get();
@@ -136,19 +142,34 @@ class DashboardController extends Controller
         // Dados para o gráfico
         $chartData = $this->getChartData($periodo, $dataInicio, $dataFim);
 
-        // Total de usuários ativos no sistema
-        $totalUsuarios = User::count();
+        // Clientes que mais compraram no período (vendas concluídas)
+        $clientesMaisCompraram = DB::table('vendas')
+            ->leftJoin('clientes', 'clientes.id', '=', 'vendas.cliente_id')
+            ->select(
+                'clientes.id as cliente_id',
+                DB::raw("COALESCE(clientes.nome, 'Consumidor não identificado') as nome"),
+                DB::raw('COUNT(vendas.id) as compras'),
+                DB::raw('SUM(vendas.valor_total) as total')
+            )
+            ->where('vendas.status', 'concluida')
+            ->whereBetween('vendas.data', [$dataInicio, $dataFim])
+            ->groupBy('clientes.id', 'clientes.nome')
+            ->orderByDesc('total')
+            ->take(5)
+            ->get();
 
         return view('dashboard.index', compact(
             'totalReceita',
             'totalDespesas',
             'totalLucro',
             'margemLucro',
+            'totalUsuarios',
+            'totalUsuariosOnline',
             'usuariosAtivos',
             'produtosMaisVendidos',
             'vendasPorCategoria',
             'chartData',
-            'totalUsuarios',
+            'clientesMaisCompraram',
             'recebimentoPix',
             'recebimentoDinheiro',
             'recebimentoDebito',

@@ -41,6 +41,7 @@
                             <th>Telefone</th>
                             <th>E-mail</th>
                             <th class="text-center">Compras</th>
+                            <th class="text-end">Valor</th>
                             <th class="text-center" style="min-width: 11rem;">Ações</th>
                         </tr>
                     </thead>
@@ -51,6 +52,7 @@
                                 <td>{{ \App\Support\BrFormat::telefoneDisplay($c->telefone) ?: '—' }}</td>
                                 <td>{{ $c->email ?: '—' }}</td>
                                 <td class="text-center">{{ $c->vendas_count }}</td>
+                                <td class="text-end text-nowrap">R$ {{ number_format((float) ($c->total_gasto_concluidas ?? 0), 2, ',', '.') }}</td>
                                 <td class="text-center">
                                     <div class="d-flex flex-wrap justify-content-center gap-1">
                                         <a href="{{ route('clients.show', $c) }}" class="btn btn-info btn-sm" title="Detalhes">
@@ -80,7 +82,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-4">Nenhum cliente encontrado.</td>
+                                <td colspan="6" class="text-center text-muted py-4">Nenhum cliente encontrado.</td>
                             </tr>
                         @endforelse
                     </tbody>
