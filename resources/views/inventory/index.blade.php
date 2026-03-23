@@ -229,6 +229,22 @@
             font-size: 0.8rem !important;
         }
     }
+
+    /* Anel circular girando — carregamento da tabela de estoque (sem texto na tela) */
+    .inventory-loader-ring {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 50%;
+        border: 3px solid rgba(67, 97, 238, 0.2);
+        border-top-color: var(--primary, #4361ee);
+        animation: inventory-loader-spin 0.75s linear infinite;
+        box-sizing: border-box;
+    }
+    @keyframes inventory-loader-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
 </style>
 @endsection
 
@@ -256,93 +272,67 @@
         </div>
         <div class="card-body">
             {{-- As mensagens de sucesso agora serão exibidas como notificações do SweetAlert2 --}}
-            
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="produtosTable">
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Nome</th>
-                            <th>Tamanho</th>
-                            <th>Categoria</th>
-                            <th>Preço de Venda</th>
-                            <th>Qtd. em Estoque</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($produtos ?? [] as $produto)
-                            <tr>
-                                <td>{{ $produto->codigo }}</td>
-                                <td>{{ $produto->nome }}</td>
-                                <td>{{ $produto->tamanho ?? '—' }}</td>
-                                <td>{{ $produto->categoria->nome }}</td>
-                                <td>R$ {{ number_format($produto->preco_venda, 2, ',', '.') }}</td>
-                                <td>{{ $produto->quantidade_estoque }}</td>
-                                <td>
-                                    @if($produto->quantidade_estoque > 10)
-                                        <span class="badge" style="background: var(--primary); color: white;">Em estoque</span>
-                                    @elseif($produto->quantidade_estoque > 0)
-                                        <span class="badge" style="background: var(--warning); color: white;">Estoque baixo</span>
-                                    @else
-                                        <span class="badge" style="background: var(--danger); color: white;">Sem estoque</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        @if (!auth()->user()->isVendedor())
-                                            <a href="{{ route('inventory.edit', $produto->id) }}" class="btn btn-primary btn-sm me-3">
-                                                <i class="fas fa-edit"></i> Editar
-                                            </a>
-                                            <!-- Formulário escondido para exclusão -->
-                                            <form action="{{ route('inventory.destroy', $produto->id) }}" method="POST" id="form-delete-{{ $produto->id }}" style="display:none;">
-                                                @csrf
-                                                @method('DELETE')
-                                            </form>
-                                            <!-- Botão que aciona o modal -->
-                                            <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="{{ $produto->id }}" data-name="{{ $produto->nome }}">
-                                                <i class="fas fa-trash-alt"></i> Excluir
-                                            </button>
-                                        @else
-                                            <span class="text-muted">Apenas visualização</span>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="text-center">Nenhum produto cadastrado</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-                
-                <!-- Paginação Custom com Setas do lado dos números -->
-                <div class="pagination-wrapper mt-4 d-flex justify-content-center">
-                    <ul class="pagination">
-                        <!-- Seta Anterior -->
-                        <li class="page-item {{ $produtos->onFirstPage() ? 'disabled' : '' }}">
-                            <a class="page-link" href="{{ $produtos->previousPageUrl() }}" aria-label="Anterior">
-                                &laquo;
-                            </a>
-                        </li>
-                        
-                        <!-- Números de Página -->
-                        @for ($i = 1; $i <= $produtos->lastPage(); $i++)
-                            <li class="page-item {{ $produtos->currentPage() == $i ? 'active' : '' }}">
-                                <a class="page-link" href="{{ $produtos->url($i) }}">{{ $i }}</a>
-                            </li>
-                        @endfor
-                        
-                        <!-- Seta Próxima -->
-                        <li class="page-item {{ $produtos->hasMorePages() ? '' : 'disabled' }}">
-                            <a class="page-link" href="{{ $produtos->nextPageUrl() }}" aria-label="Próximo">
-                                &raquo;
-                            </a>
-                        </li>
-                    </ul>
+
+            <div class="row g-3 align-items-end mb-3">
+                <div class="col-md-6 col-lg-5">
+                    <label for="inventory-search" class="form-label fw-bold mb-1">
+                        <i class="fas fa-search me-1"></i> Pesquisar
+                    </label>
+                    <input type="search"
+                           class="form-control"
+                           id="inventory-search"
+                           placeholder="Nome, código ou tamanho…"
+                           autocomplete="off"
+                           value="{{ request('search') }}">
                 </div>
+                <div class="col-md-5 col-lg-4">
+                    <label for="inventory-categoria" class="form-label fw-bold mb-1">
+                        <i class="fas fa-tags me-1"></i> Categoria
+                    </label>
+                    <select class="form-select" id="inventory-categoria">
+                        <option value="">Todas as categorias</option>
+                        @foreach ($categorias as $cat)
+                            <option value="{{ $cat->id }}" @selected((string) request('categoria') === (string) $cat->id)>
+                                {{ $cat->nome }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-12 col-lg-3">
+                    <p class="text-muted small mb-0" id="inventory-total-hint"></p>
+                </div>
+            </div>
+
+            <div class="position-relative" id="inventory-table-wrap">
+                <div id="inventory-loading"
+                     class="d-none position-absolute top-0 start-0 w-100 h-100 align-items-center justify-content-center"
+                     style="z-index: 5; background: rgba(255,255,255,0.7); border-radius: 0.25rem;"
+                     aria-busy="false">
+                    <div class="inventory-loader-ring" role="status" aria-label="Carregando lista de produtos"></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="produtosTable">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nome</th>
+                                <th>Tamanho</th>
+                                <th>Categoria</th>
+                                <th>Preço de Venda</th>
+                                <th>Qtd. em Estoque</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="produtos-tbody">
+                            @include('inventory.partials.table-rows', ['produtos' => $produtos])
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="inventory-pagination-wrap">
+                @include('inventory.partials.pagination-inventory', ['produtos' => $produtos])
             </div>
         </div>
     </div>
@@ -350,6 +340,9 @@
 @endsection
 
 @section('scripts')
+<script>
+    window.INVENTORY_TABLE_URL = @json(route('inventory.table-data'));
+</script>
 <!-- Adicionar SweetAlert2 com animações melhoradas -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -413,9 +406,98 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Configurar botões de exclusão
+// Pesquisa e filtro em tempo real (estoque)
 $(document).ready(function() {
-    $('.delete-btn').on('click', function() {
+    var $tbody = $('#produtos-tbody');
+    var $pagination = $('#inventory-pagination-wrap');
+    var $loading = $('#inventory-loading');
+    var $hint = $('#inventory-total-hint');
+    var $search = $('#inventory-search');
+    var $categoria = $('#inventory-categoria');
+    var debounceTimer = null;
+
+    function setTotalHint(total) {
+        if (typeof total !== 'number') return;
+        if (total === 0) {
+            $hint.text('Nenhum resultado');
+        } else if (total === 1) {
+            $hint.text('1 produto encontrado');
+        } else {
+            $hint.text(total + ' produtos encontrados');
+        }
+    }
+
+    function showLoading(show) {
+        if (show) {
+            $loading.removeClass('d-none').addClass('d-flex').attr('aria-busy', 'true');
+        } else {
+            $loading.removeClass('d-flex').addClass('d-none').attr('aria-busy', 'false');
+        }
+    }
+
+    function loadInventoryTable(page) {
+        page = page || 1;
+        var params = new URLSearchParams();
+        var q = ($search.val() || '').trim();
+        var cat = $categoria.val() || '';
+        if (q) params.set('search', q);
+        if (cat) params.set('categoria', cat);
+        params.set('page', page);
+
+        showLoading(true);
+        fetch(window.INVENTORY_TABLE_URL + '?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+            .then(function (r) {
+                if (!r.ok) throw new Error('Erro ao carregar');
+                return r.json();
+            })
+            .then(function (data) {
+                $tbody.html(data.html);
+                $pagination.html(data.pagination || '');
+                if (typeof data.total === 'number') {
+                    setTotalHint(data.total);
+                }
+            })
+            .catch(function () {
+                $hint.text('Não foi possível atualizar a lista.');
+            })
+            .finally(function () {
+                showLoading(false);
+            });
+    }
+
+    setTotalHint({{ (int) $produtos->total() }});
+
+    $search.on('input', function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () {
+            loadInventoryTable(1);
+        }, 300);
+    });
+
+    $categoria.on('change', function () {
+        loadInventoryTable(1);
+    });
+
+    $(document).on('click', '.js-inventory-page', function (e) {
+        e.preventDefault();
+        var $li = $(this).closest('.page-item');
+        if ($li.hasClass('disabled')) return;
+        var p = parseInt($(this).data('page'), 10);
+        if (!isNaN(p) && p >= 1) {
+            loadInventoryTable(p);
+        }
+    });
+});
+
+// Configurar botões de exclusão (delegado — funciona após atualizar a tabela via AJAX)
+$(document).ready(function() {
+    $(document).on('click', '.delete-btn', function() {
         var productId = $(this).data('id');
         var productName = $(this).data('name');
         
@@ -458,14 +540,6 @@ $(document).ready(function() {
                 });
             }
         });
-    });
-
-    // Configuração do DataTables
-    $('#produtosTable').DataTable({
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/pt-BR.json'
-        },
-        responsive: true
     });
 });
 </script>

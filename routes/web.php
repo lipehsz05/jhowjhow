@@ -107,6 +107,7 @@ Route::middleware(['auth'])->group(function () {
     // Estoque
     Route::prefix('inventory')->name('inventory.')->group(function () {
         Route::get('/', [InventoryController::class, 'index'])->name('index');
+        Route::get('/table-data', [InventoryController::class, 'tableData'])->name('table-data');
         Route::get('/create', [InventoryController::class, 'create'])->name('create');
         Route::post('/', [InventoryController::class, 'store'])->name('store');
         Route::get('/{produto}/edit', [InventoryController::class, 'edit'])->name('edit');

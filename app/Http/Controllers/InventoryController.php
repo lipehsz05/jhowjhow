@@ -18,29 +18,53 @@ class InventoryController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Produto::query();
-        
-        // Filtros
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
+        $produtos = $this->produtosIndexQuery($request)->paginate(15)->withQueryString();
+        $categorias = Categoria::where('ativa', true)->orderBy('nome')->get();
+
+        return view('inventory.index', compact('produtos', 'categorias'));
+    }
+
+    /**
+     * Dados da tabela de estoque para atualização via AJAX (pesquisa e filtro em tempo real).
+     */
+    public function tableData(Request $request)
+    {
+        $produtos = $this->produtosIndexQuery($request)
+            ->paginate(15)
+            ->appends($request->only(['search', 'categoria', 'estoque_baixo']));
+
+        return response()->json([
+            'html' => view('inventory.partials.table-rows', compact('produtos'))->render(),
+            'pagination' => view('inventory.partials.pagination-inventory', compact('produtos'))->render(),
+            'total' => $produtos->total(),
+        ]);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder<Produto>
+     */
+    private function produtosIndexQuery(Request $request)
+    {
+        $query = Produto::query()->with('categoria');
+
+        if ($request->filled('search')) {
+            $search = trim((string) $request->input('search'));
+            $query->where(function ($q) use ($search) {
                 $q->where('nome', 'like', "%{$search}%")
-                  ->orWhere('codigo', 'like', "%{$search}%");
+                    ->orWhere('codigo', 'like', "%{$search}%")
+                    ->orWhere('tamanho', 'like', "%{$search}%");
             });
         }
-        
-        if ($request->has('categoria')) {
-            $query->where('categoria_id', $request->categoria);
+
+        if ($request->filled('categoria')) {
+            $query->where('categoria_id', $request->input('categoria'));
         }
-        
-        if ($request->has('estoque_baixo') && $request->estoque_baixo) {
+
+        if ($request->has('estoque_baixo') && $request->boolean('estoque_baixo')) {
             $query->whereRaw('quantidade_estoque <= estoque_minimo');
         }
-        
-        $produtos = $query->with('categoria')->orderBy('nome')->paginate(15);
-        $categorias = Categoria::where('ativa', true)->orderBy('nome')->get();
-        
-        return view('inventory.index', compact('produtos', 'categorias'));
+
+        return $query->orderBy('nome');
     }
     
     /**
