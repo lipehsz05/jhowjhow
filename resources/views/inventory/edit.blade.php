@@ -74,12 +74,28 @@
                                 <select class="form-select @error('categoria_id') is-invalid @enderror" id="categoria_id" name="categoria_id" required>
                                     <option value="">Selecione uma categoria</option>
                                     @foreach($categorias as $categoria)
-                                        <option value="{{ $categoria->id }}" {{ old('categoria_id', $produto->categoria_id) == $categoria->id ? 'selected' : '' }}>
+                                        <option value="{{ $categoria->id }}"
+                                                data-tipo-tamanho="{{ $categoria->tipo_tamanho ?? \App\Support\TamanhosBrasil::TIPO_UNICO }}"
+                                                {{ old('categoria_id', $produto->categoria_id) == $categoria->id ? 'selected' : '' }}>
                                             {{ $categoria->nome }}
                                         </option>
                                     @endforeach
                                 </select>
                                 @error('categoria_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="form-group mb-3" id="tamanho_wrapper" style="display: none;">
+                                <label for="tamanho" class="form-label fw-bold">
+                                    <i class="fas fa-ruler-vertical me-1"></i> Tamanho*
+                                </label>
+                                <select class="form-select @error('tamanho') is-invalid @enderror"
+                                        id="tamanho"
+                                        name="tamanho">
+                                    <option value="">Selecione o tamanho</option>
+                                </select>
+                                @error('tamanho')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -310,6 +326,13 @@
 @endsection
 
 @section('scripts')
+<script>
+    window.TAMANHOS_POR_TIPO = @json([
+        'roupa' => \App\Support\TamanhosBrasil::opcoesRoupa(),
+        'calcado' => \App\Support\TamanhosBrasil::opcoesCalcado(),
+    ]);
+    window.OLD_TAMANHO_PRODUTO = @json(old('tamanho', $produto->tamanho));
+</script>
 <!-- Adicionar SweetAlert2 com animações melhoradas -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- Adicionar Animate.css para animações nas notificações -->
@@ -328,6 +351,34 @@ if (sessionData.success === "") sessionData.success = null;
 if (sessionData.error === "") sessionData.error = null;
 
 $(document).ready(function() {
+    function atualizarCampoTamanho() {
+        var $cat = $('#categoria_id');
+        var opt = $cat.find('option:selected');
+        var tipo = opt.attr('data-tipo-tamanho') || 'unico';
+        var $wrap = $('#tamanho_wrapper');
+        var $tam = $('#tamanho');
+        if (tipo === 'unico') {
+            $wrap.hide();
+            $tam.prop('required', false).val('');
+            $tam.empty().append('<option value="">—</option>');
+            return;
+        }
+        $wrap.show();
+        $tam.prop('required', true);
+        var lista = (window.TAMANHOS_POR_TIPO && window.TAMANHOS_POR_TIPO[tipo]) || [];
+        $tam.empty().append('<option value="">Selecione o tamanho</option>');
+        lista.forEach(function (t) {
+            $tam.append($('<option></option>').attr('value', t).text(t));
+        });
+        var oldVal = window.OLD_TAMANHO_PRODUTO;
+        if (oldVal && lista.indexOf(oldVal) !== -1) {
+            $tam.val(oldVal);
+        }
+    }
+
+    $('#categoria_id').on('change', atualizarCampoTamanho);
+    atualizarCampoTamanho();
+
     // Verificar e mostrar mensagens de sessão
     if (sessionData.success) {
         Swal.fire({

@@ -113,6 +113,7 @@ class ProdutoSeeder extends Seeder
             'descricao' => 'Camiseta básica de algodão unissex',
             'codigo' => 'ROU001',
             'categoria_id' => 5,
+            'tamanho' => 'M',
             'preco_compra' => 15.00,
             'preco_venda' => 35.90,
             'quantidade_estoque' => 30,

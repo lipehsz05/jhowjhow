@@ -79,7 +79,9 @@
                             <select class="form-select @error('categoria_id') is-invalid @enderror" id="categoria_id" name="categoria_id" required>
                                 <option value="">Selecione uma categoria</option>
                                 @foreach($categorias as $categoria)
-                                    <option value="{{ $categoria->id }}" {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>
+                                    <option value="{{ $categoria->id }}"
+                                            data-tipo-tamanho="{{ $categoria->tipo_tamanho ?? \App\Support\TamanhosBrasil::TIPO_UNICO }}"
+                                            {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>
                                         {{ $categoria->nome }}
                                     </option>
                                 @endforeach
@@ -87,6 +89,21 @@
                             @error('categoria_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        <div class="form-group mb-3" id="tamanho_wrapper" style="display: none;">
+                            <label for="tamanho" class="form-label fw-bold">
+                                <i class="fas fa-ruler-vertical me-1"></i> Tamanho*
+                            </label>
+                            <select class="form-select @error('tamanho') is-invalid @enderror"
+                                    id="tamanho"
+                                    name="tamanho">
+                                <option value="">Selecione o tamanho</option>
+                            </select>
+                            @error('tamanho')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <div class="form-text">Aparece quando a categoria usa grade de roupas ou calçados.</div>
                         </div>
                     </div>
                     
@@ -229,12 +246,47 @@
 @endsection
 
 @section('scripts')
+<script>
+    window.TAMANHOS_POR_TIPO = @json([
+        'roupa' => \App\Support\TamanhosBrasil::opcoesRoupa(),
+        'calcado' => \App\Support\TamanhosBrasil::opcoesCalcado(),
+    ]);
+    window.OLD_TAMANHO_PRODUTO = @json(old('tamanho'));
+</script>
 <!-- jQuery Mask Plugin -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 <script>
     // Esperar até que o jQuery esteja disponível
     $(document).ready(function() {
         console.log('Document ready!');
+
+        function atualizarCampoTamanho() {
+            var $cat = $('#categoria_id');
+            var opt = $cat.find('option:selected');
+            var tipo = opt.attr('data-tipo-tamanho') || 'unico';
+            var $wrap = $('#tamanho_wrapper');
+            var $tam = $('#tamanho');
+            if (tipo === 'unico') {
+                $wrap.hide();
+                $tam.prop('required', false).val('');
+                $tam.empty().append('<option value="">—</option>');
+                return;
+            }
+            $wrap.show();
+            $tam.prop('required', true);
+            var lista = (window.TAMANHOS_POR_TIPO && window.TAMANHOS_POR_TIPO[tipo]) || [];
+            $tam.empty().append('<option value="">Selecione o tamanho</option>');
+            lista.forEach(function (t) {
+                $tam.append($('<option></option>').attr('value', t).text(t));
+            });
+            var oldVal = window.OLD_TAMANHO_PRODUTO;
+            if (oldVal && lista.indexOf(oldVal) !== -1) {
+                $tam.val(oldVal);
+            }
+        }
+
+        $('#categoria_id').on('change', atualizarCampoTamanho);
+        atualizarCampoTamanho();
         
         // Máscaras para campos de preço
         if($.fn.mask) {

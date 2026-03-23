@@ -332,10 +332,11 @@
                                                 <div class="produto-item" 
                                                     data-id="{{ $produto->id }}"
                                                     data-nome="{{ $produto->nome }}" 
+                                                    data-tamanho="{{ $produto->tamanho ?? '' }}"
                                                     data-preco="{{ $produto->preco_venda }}"
                                                     data-estoque="{{ $produto->quantidade_estoque }}"
                                                     data-fornecedor="{{ $produto->fornecedor ?? 'Não especificado' }}">
-                                                    <div class="produto-nome">{{ $produto->nome }}</div>
+                                                    <div class="produto-nome">{{ $produto->nome }}@if($produto->tamanho)<span class="text-muted"> — tam. {{ $produto->tamanho }}</span>@endif</div>
                                                     <div class="produto-info">
                                                         <span class="produto-preco">R$ {{ number_format($produto->preco_venda, 2, ',', '.') }}</span> 
                                                         <span class="produto-fornecedor">{{ $produto->fornecedor ?? 'Não especificado' }}</span>
@@ -682,6 +683,7 @@
             todosProdutos.push({
                 id: item.dataset.id,
                 nome: item.dataset.nome.toLowerCase(),
+                tamanho: (item.dataset.tamanho || '').toLowerCase(),
                 preco: parseFloat(item.dataset.preco),
                 estoque: parseInt(item.dataset.estoque, 10),
                 fornecedor: item.dataset.fornecedor,
@@ -749,7 +751,7 @@
             let encontrados = 0;
             
             todosProdutos.forEach(produto => {
-                if (termoBusca === '' || produto.nome.includes(termoBusca) || produto.fornecedor.toLowerCase().includes(termoBusca)) {
+                if (termoBusca === '' || produto.nome.includes(termoBusca) || produto.tamanho.includes(termoBusca) || produto.fornecedor.toLowerCase().includes(termoBusca)) {
                     produto.element.style.display = 'block';
                     encontrados++;
                 } else {
@@ -770,10 +772,11 @@
         function selecionarProduto(produtoItem) {
             const id = produtoItem.dataset.id;
             const nome = produtoItem.dataset.nome;
+            const tamanho = produtoItem.dataset.tamanho || '';
             const fornecedor = produtoItem.dataset.fornecedor;
             
             // Atualizar campo de busca e hidden input
-            produtoSearch.value = `${nome} - ${fornecedor}`;
+            produtoSearch.value = tamanho ? `${nome} (tam. ${tamanho}) — ${fornecedor}` : `${nome} — ${fornecedor}`;
             produtoSelect.value = id;
             
             // Destacar produto selecionado
@@ -878,6 +881,7 @@
             }
             
             const nome = produtoSelecionado.element.dataset.nome;
+            const tamanhoItem = produtoSelecionado.element.dataset.tamanho || '';
             const precoUnitario = parseFloat(produtoSelecionado.element.dataset.preco);
             const estoqueDisponivel = parseInt(produtoSelecionado.element.dataset.estoque, 10);
             const fornecedor = produtoSelecionado.element.dataset.fornecedor || 'Não especificado';
@@ -900,6 +904,7 @@
                 produtos.push({
                     id: produtoId,
                     nome: nome,
+                    tamanho: tamanhoItem,
                     fornecedor: fornecedor,
                     quantidade: quantidade,
                     preco_unitario: precoUnitario,
@@ -940,11 +945,12 @@
             } else {
                 let html = '';
                 produtos.forEach((produto, index) => {
+                    const rotuloTam = produto.tamanho ? ` <span class="text-muted">(tam. ${produto.tamanho})</span>` : '';
                     html += `
                     <tr>
                         <td>
                             <div class="produto-info">
-                                <span class="nome-produto">${produto.nome}</span>
+                                <span class="nome-produto">${produto.nome}${rotuloTam}</span>
                                 <span class="fornecedor-produto"><i class="fas fa-industry"></i> ${produto.fornecedor}</span>
                             </div>
                         </td>

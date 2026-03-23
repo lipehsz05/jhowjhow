@@ -26,6 +26,7 @@ class Produto extends Model
         'descricao',
         'codigo',
         'categoria_id',
+        'tamanho',
         'preco_compra',
         'preco_venda',
         'quantidade_estoque',

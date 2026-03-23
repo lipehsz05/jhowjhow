@@ -79,6 +79,26 @@
                             @enderror
                         </div>
 
+                        <div class="mb-3">
+                            <label for="tipo_tamanho" class="form-label fw-bold">
+                                <i class="fas fa-ruler-combined me-1"></i> Tipo de grade de tamanho*
+                            </label>
+                            <select class="form-select @error('tipo_tamanho') is-invalid @enderror"
+                                    id="tipo_tamanho"
+                                    name="tipo_tamanho"
+                                    required>
+                                @foreach(\App\Support\TamanhosBrasil::labelsTipo() as $valor => $rotulo)
+                                    <option value="{{ $valor }}" @selected(old('tipo_tamanho', \App\Support\TamanhosBrasil::TIPO_UNICO) === $valor)>
+                                        {{ $rotulo }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('tipo_tamanho')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <div class="form-text">Define quais tamanhos aparecem ao cadastrar produtos nesta categoria (roupas em letras, calçados em numeração BR ou sem grade).</div>
+                        </div>
+
                         <div class="mb-4 form-check">
                             <input type="checkbox"
                                    class="form-check-input @error('ativa') is-invalid @enderror"

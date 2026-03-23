@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Produto;
 use App\Models\Categoria;
+use App\Support\TamanhosBrasil;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class InventoryController extends Controller
 {
@@ -35,7 +37,7 @@ class InventoryController extends Controller
             $query->whereRaw('quantidade_estoque <= estoque_minimo');
         }
         
-        $produtos = $query->orderBy('nome')->paginate(15);
+        $produtos = $query->with('categoria')->orderBy('nome')->paginate(15);
         $categorias = Categoria::where('ativa', true)->orderBy('nome')->get();
         
         return view('inventory.index', compact('produtos', 'categorias'));
@@ -55,26 +57,32 @@ class InventoryController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'nome' => 'required|max:255',
-            'codigo' => 'required|unique:produtos,codigo|max:50',
-            'preco_compra' => 'required|numeric|min:0',
-            'preco_venda' => 'required|numeric|min:0',
-            'quantidade_estoque' => 'required|integer|min:0',
-            'estoque_minimo' => 'required|integer|min:0',
-            'categoria_id' => 'required|exists:categorias,id',
-            'imagem' => 'nullable|image|max:2048',
-        ]);
-        
-        $data = $request->all();
-        $data['data_cadastro'] = now();
-        
-        // Upload da imagem
+        $validated = $request->validate($this->produtoValidationRules($request, null));
+
+        $categoria = Categoria::findOrFail($validated['categoria_id']);
+        $tipo = $categoria->tipo_tamanho ?? TamanhosBrasil::TIPO_UNICO;
+
+        $data = [
+            'nome' => $validated['nome'],
+            'codigo' => $validated['codigo'],
+            'descricao' => $request->input('descricao'),
+            'categoria_id' => $validated['categoria_id'],
+            'tamanho' => in_array($tipo, [TamanhosBrasil::TIPO_ROUPA, TamanhosBrasil::TIPO_CALCADO], true)
+                ? $validated['tamanho']
+                : null,
+            'preco_compra' => $validated['preco_compra'],
+            'preco_venda' => $validated['preco_venda'],
+            'quantidade_estoque' => $validated['quantidade_estoque'],
+            'estoque_minimo' => $validated['estoque_minimo'],
+            'fornecedor' => $request->input('fornecedor'),
+            'ativo' => $request->boolean('ativo'),
+            'data_cadastro' => now(),
+        ];
+
         if ($request->hasFile('imagem')) {
-            $path = $request->file('imagem')->store('produtos', 'public');
-            $data['imagem'] = $path;
+            $data['imagem'] = $request->file('imagem')->store('produtos', 'public');
         }
-        
+
         Produto::create($data);
         
         return redirect()->route('inventory.index')
@@ -95,30 +103,34 @@ class InventoryController extends Controller
      */
     public function update(Request $request, Produto $produto)
     {
-        $request->validate([
-            'nome' => 'required|max:255',
-            'codigo' => 'required|max:50|unique:produtos,codigo,'.$produto->id,
-            'preco_compra' => 'required|numeric|min:0',
-            'preco_venda' => 'required|numeric|min:0',
-            'quantidade_estoque' => 'required|integer|min:0',
-            'estoque_minimo' => 'required|integer|min:0',
-            'categoria_id' => 'required|exists:categorias,id',
-            'imagem' => 'nullable|image|max:2048',
-        ]);
-        
-        $data = $request->all();
-        
-        // Upload da nova imagem
+        $validated = $request->validate($this->produtoValidationRules($request, $produto->id));
+
+        $categoria = Categoria::findOrFail($validated['categoria_id']);
+        $tipo = $categoria->tipo_tamanho ?? TamanhosBrasil::TIPO_UNICO;
+
+        $data = [
+            'nome' => $validated['nome'],
+            'codigo' => $validated['codigo'],
+            'descricao' => $request->input('descricao'),
+            'categoria_id' => $validated['categoria_id'],
+            'tamanho' => in_array($tipo, [TamanhosBrasil::TIPO_ROUPA, TamanhosBrasil::TIPO_CALCADO], true)
+                ? $validated['tamanho']
+                : null,
+            'preco_compra' => $validated['preco_compra'],
+            'preco_venda' => $validated['preco_venda'],
+            'quantidade_estoque' => $validated['quantidade_estoque'],
+            'estoque_minimo' => $validated['estoque_minimo'],
+            'fornecedor' => $request->input('fornecedor'),
+            'ativo' => $request->boolean('ativo'),
+        ];
+
         if ($request->hasFile('imagem')) {
-            // Excluir imagem anterior
             if ($produto->imagem) {
                 Storage::disk('public')->delete($produto->imagem);
             }
-            
-            $path = $request->file('imagem')->store('produtos', 'public');
-            $data['imagem'] = $path;
+            $data['imagem'] = $request->file('imagem')->store('produtos', 'public');
         }
-        
+
         $produto->update($data);
         
         return redirect()->route('inventory.index')
@@ -163,5 +175,39 @@ class InventoryController extends Controller
             return redirect()->route('inventory.index')
                 ->with('error', 'Erro ao excluir produto: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function produtoValidationRules(Request $request, ?int $produtoId): array
+    {
+        $codigoRule = $produtoId !== null
+            ? 'required|max:50|unique:produtos,codigo,'.$produtoId
+            : 'required|unique:produtos,codigo|max:50';
+
+        $rules = [
+            'nome' => 'required|max:255',
+            'codigo' => $codigoRule,
+            'preco_compra' => 'required|numeric|min:0',
+            'preco_venda' => 'required|numeric|min:0',
+            'quantidade_estoque' => 'required|integer|min:0',
+            'estoque_minimo' => 'required|integer|min:0',
+            'categoria_id' => 'required|exists:categorias,id',
+            'imagem' => 'nullable|image|max:2048',
+        ];
+
+        $categoria = Categoria::query()->find($request->input('categoria_id'));
+        $tipo = $categoria ? ($categoria->tipo_tamanho ?? TamanhosBrasil::TIPO_UNICO) : TamanhosBrasil::TIPO_UNICO;
+
+        if ($tipo === TamanhosBrasil::TIPO_ROUPA) {
+            $rules['tamanho'] = ['required', 'string', Rule::in(TamanhosBrasil::opcoesRoupa())];
+        } elseif ($tipo === TamanhosBrasil::TIPO_CALCADO) {
+            $rules['tamanho'] = ['required', 'string', Rule::in(TamanhosBrasil::opcoesCalcado())];
+        } else {
+            $rules['tamanho'] = 'nullable|string|max:20';
+        }
+
+        return $rules;
     }
 }

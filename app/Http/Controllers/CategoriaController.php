@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
+use App\Support\TamanhosBrasil;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CategoriaController extends Controller
 {
@@ -27,6 +29,7 @@ class CategoriaController extends Controller
         $validated = $request->validate([
             'nome' => 'required|string|max:255|unique:categorias,nome',
             'descricao' => 'nullable|string|max:5000',
+            'tipo_tamanho' => ['required', Rule::in(array_keys(TamanhosBrasil::labelsTipo()))],
             'ativa' => 'sometimes|boolean',
         ], [
             'nome.required' => 'Informe o nome da categoria.',
@@ -52,6 +55,7 @@ class CategoriaController extends Controller
         $validated = $request->validate([
             'nome' => 'required|string|max:255|unique:categorias,nome,' . $categoria->id,
             'descricao' => 'nullable|string|max:5000',
+            'tipo_tamanho' => ['required', Rule::in(array_keys(TamanhosBrasil::labelsTipo()))],
             'ativa' => 'sometimes|boolean',
         ], [
             'nome.required' => 'Informe o nome da categoria.',

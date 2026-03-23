@@ -94,7 +94,7 @@
                         @foreach ($venda->itens as $index => $item)
                         <tr>
                             <td>{{ $index + 1 }}</td>
-                            <td>{{ $item->produto->nome }}</td>
+                            <td>{{ $item->produto->nome }}@if($item->produto->tamanho) <span class="text-muted">(tam. {{ $item->produto->tamanho }})</span>@endif</td>
                             <td class="text-center">{{ $item->quantidade }}</td>
                             <td class="text-end">R$ {{ number_format($item->preco_unitario, 2, ',', '.') }}</td>
                             <td class="text-end">R$ {{ number_format($item->quantidade * $item->preco_unitario, 2, ',', '.') }}</td>

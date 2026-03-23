@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Categoria;
+use App\Support\TamanhosBrasil;
 
 class CategoriaSeeder extends Seeder
 {
@@ -18,8 +19,8 @@ class CategoriaSeeder extends Seeder
             ['nome' => 'Bebidas', 'descricao' => 'Bebidas alcoólicas e não alcoólicas'],
             ['nome' => 'Limpeza', 'descricao' => 'Produtos de limpeza doméstica e industrial'],
             ['nome' => 'Eletrônicos', 'descricao' => 'Aparelhos e acessórios eletrônicos'],
-            ['nome' => 'Roupas', 'descricao' => 'Vestuário masculino e feminino'],
-            ['nome' => 'Calçados', 'descricao' => 'Sapatos, tênis e sandálias'],
+            ['nome' => 'Roupas', 'descricao' => 'Vestuário masculino e feminino', 'tipo_tamanho' => TamanhosBrasil::TIPO_ROUPA],
+            ['nome' => 'Calçados', 'descricao' => 'Sapatos, tênis e sandálias', 'tipo_tamanho' => TamanhosBrasil::TIPO_CALCADO],
             ['nome' => 'Móveis', 'descricao' => 'Móveis para casa e escritório'],
             ['nome' => 'Utensílios', 'descricao' => 'Utensílios domésticos'],
             ['nome' => 'Ferramentas', 'descricao' => 'Ferramentas manuais e elétricas'],

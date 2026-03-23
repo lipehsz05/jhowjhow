@@ -42,6 +42,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Nome</th>
+                                <th>Tamanho</th>
                                 <th>Descrição</th>
                                 <th class="text-center">Produtos</th>
                                 <th class="text-center">Status</th>
@@ -52,6 +53,7 @@
                             @foreach ($categorias as $categoria)
                                 <tr>
                                     <td class="fw-semibold">{{ $categoria->nome }}</td>
+                                    <td class="small">{{ $categoria->tipo_tamanho_label }}</td>
                                     <td class="text-muted small">
                                         {{ $categoria->descricao ? \Illuminate\Support\Str::limit($categoria->descricao, 80) : '—' }}
                                     </td>

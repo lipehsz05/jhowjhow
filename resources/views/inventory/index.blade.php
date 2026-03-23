@@ -263,6 +263,7 @@
                         <tr>
                             <th>Código</th>
                             <th>Nome</th>
+                            <th>Tamanho</th>
                             <th>Categoria</th>
                             <th>Preço de Venda</th>
                             <th>Qtd. em Estoque</th>
@@ -275,6 +276,7 @@
                             <tr>
                                 <td>{{ $produto->codigo }}</td>
                                 <td>{{ $produto->nome }}</td>
+                                <td>{{ $produto->tamanho ?? '—' }}</td>
                                 <td>{{ $produto->categoria->nome }}</td>
                                 <td>R$ {{ number_format($produto->preco_venda, 2, ',', '.') }}</td>
                                 <td>{{ $produto->quantidade_estoque }}</td>
@@ -310,7 +312,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center">Nenhum produto cadastrado</td>
+                                <td colspan="8" class="text-center">Nenhum produto cadastrado</td>
                             </tr>
                         @endforelse
                     </tbody>
