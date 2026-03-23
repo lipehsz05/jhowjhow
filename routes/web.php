@@ -8,6 +8,7 @@ use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\MovimentacaoEstoqueController;
 use App\Http\Controllers\DevToolsController;
+use App\Http\Controllers\RelatorioController;
 use App\Http\Controllers\SalesController;
 use Illuminate\Support\Facades\Route;
 
@@ -77,6 +78,8 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/dados', [DashboardController::class, 'getDashboardData'])->name('dashboard.dados');
+    Route::get('/relatorio', [RelatorioController::class, 'index'])->name('relatorio.index');
+    Route::get('/relatorio/exportar-excel', [RelatorioController::class, 'exportExcel'])->name('relatorio.export');
 
     // Perfil do usuário
     Route::get('/profile', [AuthController::class, 'showProfileForm'])->name('profile');

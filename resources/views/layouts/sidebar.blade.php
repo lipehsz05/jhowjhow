@@ -38,6 +38,12 @@
                 <span>Clientes</span>
             </a>
         </li>
+        <li>
+            <a href="{{ route('relatorio.index') }}" class="{{ request()->routeIs('relatorio.*') ? 'active' : '' }}">
+                <i class="fas fa-chart-pie"></i>
+                <span>Relatório</span>
+            </a>
+        </li>
         @endif
         
         {{-- Histórico: acessível para administrador, dono e vendedor --}}
