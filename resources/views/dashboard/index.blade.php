@@ -545,15 +545,17 @@
                             </div>
                             <div class="client-info">
                                 @if($usuario->nivel_acesso == 'dev')
-                                    <span class="badge text-white" style="background:#6f42c1;">DEV</span>
+                                    <span class="badge user-online-role-badge user-online-role-badge--dev text-white">
+                                        <span class="user-online-role-badge-label">DEV</span>
+                                    </span>
                                 @else
-                                    <span class="badge text-white
+                                    <span class="badge user-online-role-badge text-white
                                         @if($usuario->nivel_acesso == 'dono') bg-dark
                                         @elseif($usuario->nivel_acesso == 'administrador') bg-primary
                                         @elseif($usuario->nivel_acesso == 'vendedor') bg-success
                                         @elseif($usuario->nivel_acesso == 'estoquista') bg-info
                                         @else bg-secondary @endif">
-                                        {{ ucfirst($usuario->nivel_acesso) }}
+                                        <span class="user-online-role-badge-label">{{ ucfirst($usuario->nivel_acesso) }}</span>
                                     </span>
                                 @endif
                                 <small class="text-muted ms-2" title="Última atividade">Online</small>
@@ -591,9 +593,58 @@
                     }
                 }
                 
-                /* Estilos para badges de cargos - mesma cor do texto "Online" */
-                .badge.bg-dark, .badge.bg-primary, .badge.bg-success, .badge.bg-info, .badge.bg-secondary {
-                    color: #6c757d !important; /* text-muted - mesma cor do texto "Online" */
+                /* Badges de cargo na lista de online: brilho animado por dentro do fundo */
+                .user-online-role-badge {
+                    position: relative;
+                    overflow: hidden;
+                    border: 0;
+                    color: #fff !important;
+                }
+                .user-online-role-badge--dev {
+                    background: #6f42c1 !important;
+                }
+                .user-online-role-badge-label {
+                    position: relative;
+                    z-index: 1;
+                }
+                .user-online-role-badge::after {
+                    content: '';
+                    position: absolute;
+                    top: -50%;
+                    left: -60%;
+                    width: 45%;
+                    height: 200%;
+                    background: linear-gradient(
+                        90deg,
+                        transparent 0%,
+                        rgba(255, 255, 255, 0) 35%,
+                        rgba(255, 255, 255, 0.55) 50%,
+                        rgba(255, 255, 255, 0) 65%,
+                        transparent 100%
+                    );
+                    transform: rotate(18deg);
+                    animation: user-online-badge-shine 14s ease-in-out infinite;
+                    pointer-events: none;
+                    z-index: 0;
+                }
+                /* Brilho rápido no início do ciclo; o resto do tempo fica parado até repetir */
+                @keyframes user-online-badge-shine {
+                    0% {
+                        left: -60%;
+                        opacity: 0;
+                    }
+                    4% {
+                        opacity: 1;
+                    }
+                    18% {
+                        left: 120%;
+                        opacity: 1;
+                    }
+                    19%,
+                    100% {
+                        left: 120%;
+                        opacity: 0;
+                    }
                 }
             </style>
         </div>

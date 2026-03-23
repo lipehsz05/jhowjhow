@@ -90,7 +90,7 @@
                             @error('tipo_tamanho')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <div class="form-text">Alterar o tipo afeta apenas novos cadastros; produtos já cadastrados mantêm o tamanho salvo.</div>
+                            <div class="form-text">Alterar o tipo afeta apenas novos cadastros; use também volumes em ml/litros para categorias como perfumes.</div>
                         </div>
 
                         <div class="mb-4 form-check">

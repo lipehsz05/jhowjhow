@@ -96,7 +96,7 @@
                             @error('tipo_tamanho')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <div class="form-text">Define quais tamanhos aparecem ao cadastrar produtos nesta categoria (roupas em letras, calçados em numeração BR ou sem grade).</div>
+                            <div class="form-text">Define quais opções aparecem ao cadastrar produtos nesta categoria (roupas em letras, calçados em numeração BR, volumes em ml/litros ou sem grade).</div>
                         </div>
 
                         <div class="mb-4 form-check">

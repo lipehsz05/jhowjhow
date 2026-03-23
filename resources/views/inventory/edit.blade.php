@@ -326,11 +326,15 @@
 @endsection
 
 @section('scripts')
-<script>
-    window.TAMANHOS_POR_TIPO = @json([
+@php
+    $tamanhosPorTipo = [
         'roupa' => \App\Support\TamanhosBrasil::opcoesRoupa(),
         'calcado' => \App\Support\TamanhosBrasil::opcoesCalcado(),
-    ]);
+        'volume' => \App\Support\TamanhosBrasil::opcoesVolume(),
+    ];
+@endphp
+<script>
+    window.TAMANHOS_POR_TIPO = @json($tamanhosPorTipo);
     window.OLD_TAMANHO_PRODUTO = @json(old('tamanho', $produto->tamanho));
 </script>
 <!-- Adicionar SweetAlert2 com animações melhoradas -->

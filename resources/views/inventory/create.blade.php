@@ -103,7 +103,7 @@
                             @error('tamanho')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <div class="form-text">Aparece quando a categoria usa grade de roupas ou calçados.</div>
+                            <div class="form-text">Aparece quando a categoria usa grade de roupas, calçados ou volumes (ml/litros).</div>
                         </div>
                     </div>
                     
@@ -246,11 +246,15 @@
 @endsection
 
 @section('scripts')
-<script>
-    window.TAMANHOS_POR_TIPO = @json([
+@php
+    $tamanhosPorTipo = [
         'roupa' => \App\Support\TamanhosBrasil::opcoesRoupa(),
         'calcado' => \App\Support\TamanhosBrasil::opcoesCalcado(),
-    ]);
+        'volume' => \App\Support\TamanhosBrasil::opcoesVolume(),
+    ];
+@endphp
+<script>
+    window.TAMANHOS_POR_TIPO = @json($tamanhosPorTipo);
     window.OLD_TAMANHO_PRODUTO = @json(old('tamanho'));
 </script>
 <!-- jQuery Mask Plugin -->

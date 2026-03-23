@@ -91,7 +91,7 @@ class InventoryController extends Controller
             'codigo' => $validated['codigo'],
             'descricao' => $request->input('descricao'),
             'categoria_id' => $validated['categoria_id'],
-            'tamanho' => in_array($tipo, [TamanhosBrasil::TIPO_ROUPA, TamanhosBrasil::TIPO_CALCADO], true)
+            'tamanho' => in_array($tipo, [TamanhosBrasil::TIPO_ROUPA, TamanhosBrasil::TIPO_CALCADO, TamanhosBrasil::TIPO_VOLUME], true)
                 ? $validated['tamanho']
                 : null,
             'preco_compra' => $validated['preco_compra'],
@@ -137,7 +137,7 @@ class InventoryController extends Controller
             'codigo' => $validated['codigo'],
             'descricao' => $request->input('descricao'),
             'categoria_id' => $validated['categoria_id'],
-            'tamanho' => in_array($tipo, [TamanhosBrasil::TIPO_ROUPA, TamanhosBrasil::TIPO_CALCADO], true)
+            'tamanho' => in_array($tipo, [TamanhosBrasil::TIPO_ROUPA, TamanhosBrasil::TIPO_CALCADO, TamanhosBrasil::TIPO_VOLUME], true)
                 ? $validated['tamanho']
                 : null,
             'preco_compra' => $validated['preco_compra'],
@@ -228,6 +228,8 @@ class InventoryController extends Controller
             $rules['tamanho'] = ['required', 'string', Rule::in(TamanhosBrasil::opcoesRoupa())];
         } elseif ($tipo === TamanhosBrasil::TIPO_CALCADO) {
             $rules['tamanho'] = ['required', 'string', Rule::in(TamanhosBrasil::opcoesCalcado())];
+        } elseif ($tipo === TamanhosBrasil::TIPO_VOLUME) {
+            $rules['tamanho'] = ['required', 'string', Rule::in(TamanhosBrasil::opcoesVolume())];
         } else {
             $rules['tamanho'] = 'nullable|string|max:20';
         }
