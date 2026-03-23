@@ -1073,7 +1073,8 @@
 
         function getTooltipTitle(label) {
             if (currentPeriod === 'daily' || currentPeriod === 'yesterday') {
-                return 'Hora: ' + label;
+                const hourLabel = extractHourLabel(label);
+                return 'Hora: ' + hourLabel;
             }
             if (currentPeriod === 'weekly' || currentPeriod === 'monthly' || currentPeriod === 'custom') {
                 const date = new Date(label + (label.length <= 10 ? 'T12:00:00' : ''));
@@ -1086,6 +1087,20 @@
                 }
             }
             return 'Período: ' + label;
+        }
+
+        function extractHourLabel(label) {
+            const text = String(label || '');
+            const match = text.match(/(\d{1,2}:\d{2})/);
+            if (match && match[1]) {
+                return match[1];
+            }
+            // fallback para formatos sem minuto
+            const hourOnly = text.match(/\b(\d{1,2})h\b/i);
+            if (hourOnly && hourOnly[1]) {
+                return hourOnly[1].padStart(2, '0') + ':00';
+            }
+            return text;
         }
 
         function buildChartDatasets(chartData) {
@@ -1215,7 +1230,13 @@
                             minRotation: 0,
                             autoSkip: true,
                             maxTicksLimit: 14,
-                            fontColor: '#64748b'
+                            fontColor: '#64748b',
+                            callback: function(value) {
+                                if (currentPeriod === 'daily' || currentPeriod === 'yesterday') {
+                                    return extractHourLabel(value);
+                                }
+                                return value;
+                            }
                         }
                     }],
                     yAxes: [{
