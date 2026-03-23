@@ -221,6 +221,83 @@
         display: none !important;
         pointer-events: none;
     }
+
+    /* Vendas marcantes (mensagem ao vendedor) */
+    .cliente-milestone-wrap {
+        display: none;
+        margin-top: 12px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #c7d2fe;
+        background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
+        box-shadow: 0 4px 14px rgba(79, 70, 229, 0.08);
+    }
+    .cliente-milestone-wrap.is-visible { display: block; }
+    .cliente-milestone-wrap--info {
+        border-color: #e2e8f0;
+        background: #f8fafc;
+        box-shadow: none;
+    }
+    .cliente-milestone-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 14px;
+        background: rgba(99, 102, 241, 0.12);
+        border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    .cliente-milestone-wrap--info .cliente-milestone-header {
+        background: #f1f5f9;
+        border-bottom-color: #e2e8f0;
+    }
+    .cliente-milestone-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: #4f46e5;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+    }
+    .cliente-milestone-wrap--info .cliente-milestone-icon {
+        background: #64748b;
+    }
+    .cliente-milestone-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1e1b4b;
+        line-height: 1.35;
+    }
+    .cliente-milestone-wrap--info .cliente-milestone-title { color: #334155; }
+    .cliente-milestone-badge {
+        display: inline-block;
+        margin-top: 6px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: #4338ca;
+        background: #fff;
+        padding: 3px 8px;
+        border-radius: 999px;
+        border: 1px solid #c7d2fe;
+    }
+    .cliente-milestone-body {
+        padding: 12px 14px 14px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: #334155;
+    }
+    .cliente-milestone-hint {
+        margin: 8px 0 0;
+        font-size: 0.78rem;
+        color: #64748b;
+        font-style: italic;
+    }
 </style>
 @endsection
 
@@ -261,6 +338,19 @@
                         @error('cliente_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                        <div id="cliente_milestone_panel" class="cliente-milestone-wrap" role="status" aria-live="polite">
+                            <div class="cliente-milestone-header">
+                                <div class="cliente-milestone-icon" aria-hidden="true"><i class="fas fa-trophy"></i></div>
+                                <div>
+                                    <p class="cliente-milestone-title" id="cliente_milestone_titulo"></p>
+                                    <span class="cliente-milestone-badge" id="cliente_milestone_badge" style="display:none;"></span>
+                                </div>
+                            </div>
+                            <div class="cliente-milestone-body">
+                                <p class="mb-0" id="cliente_milestone_texto"></p>
+                                <p class="cliente-milestone-hint" id="cliente_milestone_hint"></p>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="form-group mb-3">
@@ -468,6 +558,57 @@
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(String(email).toLowerCase());
     }
+
+    /** Painel de vendas marcantes (mensagem ao vendedor após escolher cliente) */
+    function carregarPainelVendasMarcantes() {
+        const panel = document.getElementById('cliente_milestone_panel');
+        const titulo = document.getElementById('cliente_milestone_titulo');
+        const texto = document.getElementById('cliente_milestone_texto');
+        const badge = document.getElementById('cliente_milestone_badge');
+        const hint = document.getElementById('cliente_milestone_hint');
+        const select = document.getElementById('cliente_id');
+        if (!panel || !select || !titulo || !texto || !badge || !hint) {
+            return;
+        }
+        const id = select.value;
+        if (!id) {
+            panel.classList.remove('is-visible', 'cliente-milestone-wrap--info');
+            titulo.textContent = '';
+            texto.textContent = '';
+            hint.textContent = '';
+            badge.style.display = 'none';
+            return;
+        }
+        const base = '{{ url('/api/clientes') }}';
+        fetch(base + '/' + encodeURIComponent(id) + '/vendas-marcantes', {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        })
+            .then(function (r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function (data) {
+                panel.classList.add('is-visible');
+                if (data.eh_marco) {
+                    panel.classList.remove('cliente-milestone-wrap--info');
+                    titulo.textContent = data.titulo || '';
+                    texto.textContent = data.mensagem || '';
+                    badge.textContent = 'Próxima concluída: ' + data.proxima_venda_numero + 'ª venda';
+                    badge.style.display = 'inline-block';
+                    hint.textContent = 'Contagem considera apenas vendas concluídas. Se salvar como provisória, o número só avança ao concluir depois.';
+                } else {
+                    panel.classList.add('cliente-milestone-wrap--info');
+                    titulo.textContent = 'Histórico do cliente';
+                    texto.textContent = data.resumo || '';
+                    badge.style.display = 'none';
+                    hint.textContent = 'Contagem considera apenas vendas concluídas. Se salvar como provisória, o número só avança ao concluir depois.';
+                }
+            })
+            .catch(function () {
+                panel.classList.remove('is-visible', 'cliente-milestone-wrap--info');
+            });
+    }
     
     // Inicialização correta do modal
     let novoClienteModal = null;
@@ -493,6 +634,12 @@
         document.getElementById('novoClienteModal').addEventListener('shown.bs.modal', function () {
             document.getElementById('nome_cliente').focus();
         });
+
+        const clienteSelectInit = document.getElementById('cliente_id');
+        if (clienteSelectInit) {
+            clienteSelectInit.addEventListener('change', carregarPainelVendasMarcantes);
+            carregarPainelVendasMarcantes();
+        }
     });
     
     // Função para cadastrar novo cliente
@@ -572,6 +719,7 @@
                 const option = new Option(data.cliente.nome, data.cliente.id);
                 select.add(option);
                 select.value = data.cliente.id;
+                carregarPainelVendasMarcantes();
                 
                 // Fechar o modal usando o método adequado
                 if (novoClienteModal) {
@@ -633,6 +781,7 @@
                             const option = new Option(response.cliente.nome, response.cliente.id);
                             select.add(option);
                             select.value = response.cliente.id;
+                            carregarPainelVendasMarcantes();
                             
                             // Fechar o modal
                             const clienteModal = bootstrap.Modal.getInstance(document.getElementById('novoClienteModal'));

@@ -216,23 +216,35 @@
         }
         
         .remember-me {
-            display: flex;
-            align-items: flex-start;
             margin-bottom: 20px;
             font-size: 14px;
-            color: var(--text-color);
+            color: var(--dark);
         }
         
-        .remember-me input {
-            margin-right: 8px;
-            margin-top: 2px;
+        .remember-me__row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .remember-me__row input {
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+        
+        .remember-me__row label {
+            margin: 0;
+            font-weight: 500;
+            cursor: pointer;
         }
         
         .remember-me small {
             display: block;
             color: #888;
             font-size: 12px;
-            margin-top: 2px;
+            margin-top: 6px;
+            margin-left: 26px;
+            line-height: 1.4;
         }
         
         .login-button {
@@ -401,10 +413,11 @@
             </div>
             
             <div class="remember-me">
-                <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                <label for="remember">
-                    Manter-me conectado
-                </label>
+                <div class="remember-me__row">
+                    <input type="checkbox" name="remember" id="remember" value="1" {{ old('remember') ? 'checked' : '' }}>
+                    <label for="remember">Manter-me conectado</label>
+                </div>
+                <small>Permanece logado por até <strong>7 dias</strong> neste dispositivo (sessão estendida + reconexão automática).</small>
             </div>
             
             <button type="submit" class="login-button" id="login-submit-btn">

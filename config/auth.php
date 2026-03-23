@@ -112,4 +112,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Manter-me conectado (login)
+    |--------------------------------------------------------------------------
+    |
+    | Duração em minutos do cookie "remember me" e da sessão quando o usuário
+    | marca "Manter-me conectado" (padrão: 7 dias = 10080 minutos).
+    |
+    */
+
+    'remember_minutes' => (int) env('AUTH_REMEMBER_MINUTES', 10080),
+
 ];

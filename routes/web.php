@@ -177,5 +177,8 @@ Route::middleware(['auth'])->group(function () {
 
         // API para busca de clientes em vendas
         Route::get('/clientes/busca', [ClientController::class, 'search'])->name('clientes.search');
+
+        // Próxima venda marcante (tela nova venda)
+        Route::get('/clientes/{cliente}/vendas-marcantes', [ClientController::class, 'milestonePreview'])->name('clientes.milestone');
     });
 });

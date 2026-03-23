@@ -33,8 +33,23 @@ class AuthController extends Controller
         // Laravel usa 'email' como campo padrão, então precisamos ajustar manualmente
         // para usar 'username' em vez de 'email'
         
-        // Verificar se o usuário deseja ser lembrado
-        $remember = $request->has('remember');
+        // Manter-me conectado: checkbox envia "remember" (boolean)
+        $remember = $request->boolean('remember');
+        $rememberMinutes = (int) config('auth.remember_minutes', 10080);
+
+        if ($remember) {
+            // Sessão e cookie "remember me" alinhados a 7 dias (ou AUTH_REMEMBER_MINUTES)
+            config([
+                'session.lifetime' => $rememberMinutes,
+                'session.expire_on_close' => false,
+            ]);
+            $guard = Auth::guard();
+            if (method_exists($guard, 'setRememberDuration')) {
+                $guard->setRememberDuration($rememberMinutes);
+            }
+        } else {
+            config(['session.expire_on_close' => true]);
+        }
 
         // Autenticar usando o campo username
         if (Auth::attempt(['username' => $request->username, 'password' => $request->password], $remember)) {
@@ -47,11 +62,6 @@ class AuthController extends Controller
                     'is_online' => true,
                     'last_activity' => now()
                 ]);
-            }
-            
-            // Se não marcou lembrar-me, configurar para expirar ao fechar navegador
-            if (!$remember) {
-                config(['session.expire_on_close' => true]);
             }
             
             // Redirecionar com base no nível de acesso
