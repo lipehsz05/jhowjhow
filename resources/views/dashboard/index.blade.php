@@ -3,6 +3,16 @@
 @section('title', 'Dashboard')
 
 @section('styles')
+{{-- Evita flash dos valores quando o usuário deixou oculto (localStorage) --}}
+<script>
+    (function () {
+        try {
+            if (localStorage.getItem('dashboardValuesVisible') === 'false') {
+                document.documentElement.classList.add('dashboard-values-pending-mask');
+            }
+        } catch (e) {}
+    })();
+</script>
 <!-- CSS específico para o Dashboard -->
 <!-- SweetAlert2 para notificações modernas -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -31,6 +41,11 @@
         background: rgba(255, 255, 255, 0.5) !important;
     }
     
+    /* Enquanto o JS não aplica máscara, esconde os números (sem flash) */
+    html.dashboard-values-pending-mask .dashboard-summary .card-value {
+        visibility: hidden !important;
+    }
+
     /* Variáveis CSS para o dashboard */
     :root {
         --card-bg: #ffffff;
@@ -902,6 +917,8 @@
                 dashboardValueToggle.setAttribute('title', valoresVisiveis ? 'Ocultar valores' : 'Mostrar valores');
                 dashboardValueToggle.setAttribute('aria-label', valoresVisiveis ? 'Ocultar valores' : 'Mostrar valores');
             }
+
+            document.documentElement.classList.remove('dashboard-values-pending-mask');
         }
 
         function atualizarCardResumo(selector, valorFormatado) {
