@@ -232,10 +232,10 @@
 
     /* Anel circular girando — carregamento da tabela de estoque (sem texto na tela) */
     .inventory-loader-ring {
-        width: 2.75rem;
-        height: 2.75rem;
+        width: 2rem;
+        height: 2rem;
         border-radius: 50%;
-        border: 3px solid rgba(67, 97, 238, 0.2);
+        border: 2px solid rgba(67, 97, 238, 0.2);
         border-top-color: var(--primary, #4361ee);
         animation: inventory-loader-spin 0.75s linear infinite;
         box-sizing: border-box;
@@ -305,8 +305,8 @@
 
             <div class="position-relative" id="inventory-table-wrap">
                 <div id="inventory-loading"
-                     class="d-none position-absolute top-0 start-0 w-100 h-100 align-items-center justify-content-center"
-                     style="z-index: 5; background: rgba(255,255,255,0.7); border-radius: 0.25rem;"
+                     class="position-absolute top-0 start-0 w-100 h-100 align-items-center justify-content-center"
+                     style="display: none; z-index: 5; background: rgba(255,255,255,0.7); border-radius: 0.25rem;"
                      aria-busy="false">
                     <div class="inventory-loader-ring" role="status" aria-label="Carregando lista de produtos"></div>
                 </div>
@@ -429,9 +429,9 @@ $(document).ready(function() {
 
     function showLoading(show) {
         if (show) {
-            $loading.removeClass('d-none').addClass('d-flex').attr('aria-busy', 'true');
+            $loading.css('display', 'flex').attr('aria-busy', 'true');
         } else {
-            $loading.removeClass('d-flex').addClass('d-none').attr('aria-busy', 'false');
+            $loading.css('display', 'none').attr('aria-busy', 'false');
         }
     }
 
@@ -444,7 +444,6 @@ $(document).ready(function() {
         if (cat) params.set('categoria', cat);
         params.set('page', page);
 
-        showLoading(true);
         fetch(window.INVENTORY_TABLE_URL + '?' + params.toString(), {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -476,6 +475,7 @@ $(document).ready(function() {
     $search.on('input', function () {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(function () {
+            showLoading(true);
             loadInventoryTable(1);
         }, 300);
     });
