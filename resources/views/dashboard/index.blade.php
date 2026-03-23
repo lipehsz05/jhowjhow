@@ -212,13 +212,24 @@
     .client-item {
         display: flex;
         justify-content: space-between;
+        align-items: center;
+        gap: 12px;
         padding: 12px 0;
         border-bottom: 1px solid #f1f3f5;
     }
     
     .client-name {
+        display: flex;
+        align-items: center;
         font-weight: 500;
         color: #343a40;
+    }
+    .client-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
     
     .client-date {
@@ -251,6 +262,27 @@
         font-size: 24px;
         font-weight: 700;
         color: var(--dark);
+    }
+    .card-value.is-hidden {
+        letter-spacing: 1px;
+        user-select: none;
+    }
+    .dashboard-visibility-toggle {
+        border: 1px solid #dfe3ea;
+        background: #fff;
+        color: #495057;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .dashboard-visibility-toggle:hover {
+        background: #f8f9fa;
+        border-color: #cfd6df;
     }
     
     /* Cores para lucros/perdas */
@@ -311,6 +343,11 @@
         
         .card-value {
             font-size: 20px;
+        }
+        .dashboard-visibility-toggle {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
         }
         
         .client-history-section,
@@ -464,12 +501,21 @@
         
         <div class="dashboard-header">
             <h2 class="dashboard-title">{{ $saudacaoDashboard }} {{ Auth::user()->name }}, bem vindo ao Dashboard 👋</h2>
-            <div class="period-selector">
-                <button type="button" id="period-daily" data-period="daily" class="period-btn active">Hoje</button>
-                <button type="button" id="period-yesterday" data-period="yesterday" class="period-btn">Ontem</button>
-                <button type="button" id="period-weekly" data-period="weekly" class="period-btn">Essa semana</button>
-                <button type="button" id="period-monthly" data-period="monthly" class="period-btn">Esse mês</button>
-                <button type="button" id="period-custom" data-period="custom" class="period-btn">personalizado</button>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <button type="button"
+                        id="dashboard-toggle-values"
+                        class="dashboard-visibility-toggle"
+                        title="Ocultar valores"
+                        aria-label="Ocultar valores">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <div class="period-selector">
+                    <button type="button" id="period-daily" data-period="daily" class="period-btn active">Hoje</button>
+                    <button type="button" id="period-yesterday" data-period="yesterday" class="period-btn">Ontem</button>
+                    <button type="button" id="period-weekly" data-period="weekly" class="period-btn">Essa semana</button>
+                    <button type="button" id="period-monthly" data-period="monthly" class="period-btn">Esse mês</button>
+                    <button type="button" id="period-custom" data-period="custom" class="period-btn">personalizado</button>
+                </div>
             </div>
             
             <!-- Seletor de datas personalizado -->
@@ -828,10 +874,58 @@
         let updatingFromUserAction = false; // Se a atualização vem de um clique do usuário
         let chartInitialized = false;   // Se o gráfico já foi inicializado
         let lastChartConfig = null;     // Guarda a última configuração do gráfico
+        let valoresVisiveis = localStorage.getItem('dashboardValuesVisible') !== 'false';
         
         // Elementos DOM importantes
         const periodButtons = document.querySelectorAll('.period-btn');
         const customDateSelector = document.getElementById('custom-date-selector');
+        const dashboardValueToggle = document.getElementById('dashboard-toggle-values');
+        const dashboardValueElements = document.querySelectorAll('.dashboard-summary .card-value');
+
+        function aplicarVisibilidadeValores() {
+            dashboardValueElements.forEach(function (el) {
+                if (!el.dataset.realValue) {
+                    el.dataset.realValue = el.textContent.trim();
+                }
+                if (valoresVisiveis) {
+                    el.textContent = el.dataset.realValue;
+                    el.classList.remove('is-hidden');
+                } else {
+                    el.textContent = '••••••';
+                    el.classList.add('is-hidden');
+                }
+            });
+
+            if (dashboardValueToggle) {
+                const iconClass = valoresVisiveis ? 'fa-eye' : 'fa-eye-slash';
+                dashboardValueToggle.innerHTML = '<i class="fas ' + iconClass + '"></i>';
+                dashboardValueToggle.setAttribute('title', valoresVisiveis ? 'Ocultar valores' : 'Mostrar valores');
+                dashboardValueToggle.setAttribute('aria-label', valoresVisiveis ? 'Ocultar valores' : 'Mostrar valores');
+            }
+        }
+
+        function atualizarCardResumo(selector, valorFormatado) {
+            const el = document.querySelector(selector);
+            if (!el) return;
+            el.dataset.realValue = valorFormatado;
+            if (valoresVisiveis) {
+                el.textContent = valorFormatado;
+                el.classList.remove('is-hidden');
+            } else {
+                el.textContent = '••••••';
+                el.classList.add('is-hidden');
+            }
+        }
+
+        if (dashboardValueToggle) {
+            dashboardValueToggle.addEventListener('click', function () {
+                valoresVisiveis = !valoresVisiveis;
+                localStorage.setItem('dashboardValuesVisible', String(valoresVisiveis));
+                aplicarVisibilidadeValores();
+            });
+        }
+
+        aplicarVisibilidadeValores();
         
         // Datas personalizadas do localStorage
         let customStartDate = localStorage.getItem('dashboardCustomStartDate') || null;
@@ -1054,17 +1148,17 @@
                 data: params,
                 success: function(data) {
                     // Atualizar cards de resumo
-                    $('#total-receita').text(formatarMoeda(data.totalReceita));
-                    $('#total-despesas').text(formatarMoeda(data.totalDespesas));
-                    $('#total-lucro').text(formatarMoeda(data.totalLucro));
-                    $('#margem-lucro').text(formatarPorcentagem(data.margemLucro));
+                    atualizarCardResumo('#total-receita', formatarMoeda(data.totalReceita));
+                    atualizarCardResumo('#total-despesas', formatarMoeda(data.totalDespesas));
+                    atualizarCardResumo('#total-lucro', formatarMoeda(data.totalLucro));
+                    atualizarCardResumo('#margem-lucro', formatarPorcentagem(data.margemLucro));
                     
                     // Atualizar recebimentos por forma de pagamento
-                    $('#pix-recebimento').text(formatarMoeda(data.recebimentoPix));
-                    $('#dinheiro-recebimento').text(formatarMoeda(data.recebimentoDinheiro));
-                    $('#debito-recebimento').text(formatarMoeda(data.recebimentoDebito));
-                    $('#credito-recebimento').text(formatarMoeda(data.recebimentoCredito));
-                    $('#vendas-provisorias').text(formatarMoeda(data.vendasProvisorias));
+                    atualizarCardResumo('#pix-recebimento', formatarMoeda(data.recebimentoPix));
+                    atualizarCardResumo('#dinheiro-recebimento', formatarMoeda(data.recebimentoDinheiro));
+                    atualizarCardResumo('#debito-recebimento', formatarMoeda(data.recebimentoDebito));
+                    atualizarCardResumo('#credito-recebimento', formatarMoeda(data.recebimentoCredito));
+                    atualizarCardResumo('#vendas-provisorias', formatarMoeda(data.vendasProvisorias));
                     
                     // Criar novo gráfico com os dados atualizados - forçar atualização quando vier do clique em botão de período
                     createChart(data.chartData, true);
