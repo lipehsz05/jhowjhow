@@ -320,6 +320,15 @@
             max-width: 100%;
             overflow-x: hidden;
         }
+
+        /* Overlay mobile: invisível por padrão; evita elemento sem estilo capturando cliques */
+        #sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1040;
+            background: rgba(0, 0, 0, 0.45);
+        }
         
         .main-content {
             margin-left: 250px;

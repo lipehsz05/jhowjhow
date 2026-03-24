@@ -66,12 +66,13 @@ class AppServiceProvider extends ServiceProvider
                 return;
             }
 
-            $primary = SiteSetting::get('primary_color', '#0a0a0a') ?? '#0a0a0a';
+            $settings = SiteSetting::query()->pluck('value', 'key');
+            $primary = $settings->get('primary_color', '#0a0a0a') ?? '#0a0a0a';
             $view->with([
-                'layoutSiteTitle' => SiteSetting::get('site_title') ?: $appName,
+                'layoutSiteTitle' => $settings->get('site_title') ?: $appName,
                 'layoutPrimaryColor' => $primary,
                 'layoutPrimaryDark' => SiteSetting::darkenHex($primary, 0.35),
-                'layoutBodyBg' => SiteSetting::get('body_bg', '#f0f0f2') ?? '#f0f0f2',
+                'layoutBodyBg' => $settings->get('body_bg', '#f0f0f2') ?? '#f0f0f2',
             ]);
         });
     }

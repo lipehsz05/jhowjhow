@@ -8,15 +8,26 @@ class SiteSetting extends Model
 {
     protected $fillable = ['key', 'value'];
 
+    /** @var array<string, string|null> */
+    protected static array $requestMemo = [];
+
     public static function get(string $key, ?string $default = null): ?string
     {
-        $row = static::query()->where('key', $key)->first();
+        if (array_key_exists($key, static::$requestMemo)) {
+            $v = static::$requestMemo[$key];
 
-        return $row?->value ?? $default;
+            return $v !== null ? $v : $default;
+        }
+
+        $row = static::query()->where('key', $key)->first();
+        static::$requestMemo[$key] = $row?->value;
+
+        return static::$requestMemo[$key] ?? $default;
     }
 
     public static function set(string $key, ?string $value): void
     {
+        unset(static::$requestMemo[$key]);
         static::query()->updateOrCreate(
             ['key' => $key],
             ['value' => $value]
