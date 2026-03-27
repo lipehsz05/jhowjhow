@@ -326,7 +326,7 @@
             display: none;
             position: fixed;
             inset: 0;
-            z-index: 1040;
+            z-index: 990;
             background: rgba(0, 0, 0, 0.45);
         }
         
