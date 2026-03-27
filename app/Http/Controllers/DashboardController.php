@@ -263,6 +263,54 @@ class DashboardController extends Controller
         // Obter dados para o gráfico
         $chartData = $this->getChartData($periodo, $dataInicio, $dataFim);
 
+        // Produtos mais vendidos no período
+        $produtosMaisVendidos = Produto::select(
+            'produtos.id',
+            'produtos.nome',
+            DB::raw('SUM(itens_venda.quantidade) as quantidade_vendida'),
+            DB::raw('SUM(itens_venda.subtotal) as total_vendido')
+        )
+            ->join('itens_venda', 'produtos.id', '=', 'itens_venda.produto_id')
+            ->join('vendas', 'itens_venda.venda_id', '=', 'vendas.id')
+            ->whereBetween('vendas.data', [$dataInicio, $dataFim])
+            ->where('vendas.status', 'concluida')
+            ->groupBy('produtos.id', 'produtos.nome')
+            ->orderByDesc('quantidade_vendida')
+            ->take(5)
+            ->get();
+
+        // Vendas por categoria no período
+        $vendasPorCategoria = Categoria::select(
+            'categorias.id',
+            'categorias.nome',
+            DB::raw('SUM(itens_venda.quantidade) as quantidade_vendida'),
+            DB::raw('SUM(itens_venda.subtotal) as total_vendido')
+        )
+            ->join('produtos', 'categorias.id', '=', 'produtos.categoria_id')
+            ->join('itens_venda', 'produtos.id', '=', 'itens_venda.produto_id')
+            ->join('vendas', 'itens_venda.venda_id', '=', 'vendas.id')
+            ->whereBetween('vendas.data', [$dataInicio, $dataFim])
+            ->where('vendas.status', 'concluida')
+            ->groupBy('categorias.id', 'categorias.nome')
+            ->orderByDesc('total_vendido')
+            ->get();
+
+        // Clientes que mais compraram no período
+        $clientesMaisCompraram = DB::table('vendas')
+            ->leftJoin('clientes', 'clientes.id', '=', 'vendas.cliente_id')
+            ->select(
+                'clientes.id as cliente_id',
+                DB::raw("COALESCE(clientes.nome, 'Consumidor não identificado') as nome"),
+                DB::raw('COUNT(vendas.id) as compras'),
+                DB::raw('SUM(vendas.valor_total) as total')
+            )
+            ->where('vendas.status', 'concluida')
+            ->whereBetween('vendas.data', [$dataInicio, $dataFim])
+            ->groupBy('clientes.id', 'clientes.nome')
+            ->orderByDesc('total')
+            ->take(5)
+            ->get();
+
         return response()->json([
             'totalReceita' => $totalReceita,
             'totalDespesas' => $totalDespesas,
@@ -274,6 +322,9 @@ class DashboardController extends Controller
             'recebimentoCredito' => $recebimentoCredito,
             'vendasProvisorias' => $vendasProvisorias,
             'chartData' => $chartData,
+            'produtosMaisVendidos' => $produtosMaisVendidos,
+            'vendasPorCategoria' => $vendasPorCategoria,
+            'clientesMaisCompraram' => $clientesMaisCompraram,
         ]);
     }
 

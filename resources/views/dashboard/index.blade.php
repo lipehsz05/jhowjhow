@@ -1389,6 +1389,95 @@
         function formatarPorcentagem(valor) {
             return valor.toFixed(1) + '%';
         }
+
+        function escapeHtml(text) {
+            return String(text ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function limitarTexto(texto, limite = 12) {
+            const t = String(texto ?? '');
+            return t.length > limite ? t.slice(0, limite) + '...' : t;
+        }
+
+        function renderTopProducts(produtos) {
+            const container = document.getElementById('top-products');
+            if (!container) return;
+
+            let html = '<h3>Produtos Mais Vendidos</h3>';
+            if (Array.isArray(produtos) && produtos.length > 0) {
+                html += '<div class="table-list-desktop"><table class="data-table"><thead><tr><th scope="col">Produto</th><th scope="col"><abbr title="Quantidade">Qtd.</abbr></th><th scope="col"><abbr title="Valor total em reais">Total</abbr></th></tr></thead><tbody>';
+                produtos.forEach(function (produto) {
+                    const nome = produto?.nome ?? '';
+                    html += '<tr><td><span class="dashboard-nome-completo" title="' + escapeHtml(nome) + '">' + escapeHtml(limitarTexto(nome, 12)) + '</span></td><td>' + (produto?.quantidade_vendida ?? 0) + '</td><td>' + formatarMoeda(Number(produto?.total_vendido ?? 0)) + '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+                html += '<div class="table-list-mobile">';
+                produtos.forEach(function (produto) {
+                    const nome = produto?.nome ?? '';
+                    html += '<article class="mobile-data-card"><div class="mobile-data-card__top"><h3 class="mobile-data-card__title"><span title="' + escapeHtml(nome) + '">' + escapeHtml(limitarTexto(nome, 12)) + '</span></h3></div><dl class="mobile-data-card__meta"><div><dt>Quantidade</dt><dd>' + (produto?.quantidade_vendida ?? 0) + '</dd></div><div><dt>Total (R$)</dt><dd>' + formatarMoeda(Number(produto?.total_vendido ?? 0)) + '</dd></div></dl></article>';
+                });
+                html += '</div>';
+            } else {
+                html += '<p>Nenhum produto vendido no período</p>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderCategorySales(categorias) {
+            const container = document.getElementById('category-sales');
+            if (!container) return;
+
+            let html = '<h3>Vendas por Categoria</h3>';
+            if (Array.isArray(categorias) && categorias.length > 0) {
+                html += '<div class="table-list-desktop"><table class="data-table"><thead><tr><th scope="col">Categoria</th><th scope="col"><abbr title="Quantidade de produtos vendidos">Qtd.</abbr></th><th scope="col"><abbr title="Valor total em reais">Total</abbr></th></tr></thead><tbody>';
+                categorias.forEach(function (categoria) {
+                    const nome = categoria?.nome ?? '';
+                    html += '<tr><td><span class="dashboard-nome-completo" title="' + escapeHtml(nome) + '">' + escapeHtml(nome) + '</span></td><td>' + (categoria?.quantidade_vendida ?? 0) + '</td><td>' + formatarMoeda(Number(categoria?.total_vendido ?? 0)) + '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+                html += '<div class="table-list-mobile">';
+                categorias.forEach(function (categoria) {
+                    const nome = categoria?.nome ?? '';
+                    html += '<article class="mobile-data-card"><div class="mobile-data-card__top"><h3 class="mobile-data-card__title"><span title="' + escapeHtml(nome) + '">' + escapeHtml(nome) + '</span></h3></div><dl class="mobile-data-card__meta"><div><dt>Qtd. produtos</dt><dd>' + (categoria?.quantidade_vendida ?? 0) + '</dd></div><div><dt>Total (R$)</dt><dd>' + formatarMoeda(Number(categoria?.total_vendido ?? 0)) + '</dd></div></dl></article>';
+                });
+                html += '</div>';
+            } else {
+                html += '<p>Nenhuma venda por categoria no período</p>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderTopClients(clientes) {
+            const container = document.getElementById('top-clients');
+            if (!container) return;
+
+            let html = '<h3>Clientes que mais compraram</h3>';
+            if (Array.isArray(clientes) && clientes.length > 0) {
+                html += '<div class="table-list-desktop"><table class="data-table"><thead><tr><th scope="col">Cliente</th><th scope="col"><abbr title="Quantidade de compras">Compras</abbr></th><th scope="col"><abbr title="Valor total em reais">Total</abbr></th></tr></thead><tbody>';
+                clientes.forEach(function (cli) {
+                    const nome = cli?.nome ?? '';
+                    html += '<tr><td><span class="dashboard-nome-completo" title="' + escapeHtml(nome) + '">' + escapeHtml(limitarTexto(nome, 12)) + '</span></td><td>' + (cli?.compras ?? 0) + '</td><td>' + formatarMoeda(Number(cli?.total ?? 0)) + '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+                html += '<div class="table-list-mobile">';
+                clientes.forEach(function (cli) {
+                    const nome = cli?.nome ?? '';
+                    html += '<article class="mobile-data-card"><div class="mobile-data-card__top"><h3 class="mobile-data-card__title"><span title="' + escapeHtml(nome) + '">' + escapeHtml(limitarTexto(nome, 12)) + '</span></h3></div><dl class="mobile-data-card__meta"><div><dt>Compras</dt><dd>' + (cli?.compras ?? 0) + '</dd></div><div><dt>Total (R$)</dt><dd>' + formatarMoeda(Number(cli?.total ?? 0)) + '</dd></div></dl></article>';
+                });
+                html += '</div>';
+            } else {
+                html += '<p>Nenhum cliente com compras no período</p>';
+            }
+
+            container.innerHTML = html;
+        }
         
         // Flag global para evitar requisições simultâneas já declarada anteriormente
         
@@ -1451,6 +1540,11 @@
                     
                     // Criar novo gráfico com os dados atualizados - forçar atualização quando vier do clique em botão de período
                     createChart(data.chartData, true);
+
+                    // Atualizar cards/tabelas detalhadas de acordo com o período selecionado
+                    renderTopProducts(data.produtosMaisVendidos || []);
+                    renderCategorySales(data.vendasPorCategoria || []);
+                    renderTopClients(data.clientesMaisCompraram || []);
                     
                     // Restaurar cursor e flags
                     document.body.style.cursor = 'default';
